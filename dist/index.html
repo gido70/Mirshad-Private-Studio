@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icons/mirshad.svg">
-  <link rel="stylesheet" href="./styles.css?v=99a4aa5">
+  <link rel="stylesheet" href="./styles.css?v=map1">
 </head>
 <body>
   <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
@@ -30,6 +30,7 @@
       <nav class="side-nav">
         <button class="nav-item active" data-view="radar" type="button"><span>◉</span><b>رادار المستجدات</b><i class="nav-badge" id="radar-nav-badge" hidden>0</i></button>
         <button class="nav-item" data-view="home" type="button"><span>⌂</span><b>الاستوديو</b></button>
+        <button class="nav-item" data-view="map" type="button"><span>◇</span><b>خريطة الاستخدام والبرومبتات</b></button>
         <button class="nav-item" data-view="search" type="button"><span>⌕</span><b>البحث الشامل</b></button>
         <button class="nav-item" data-view="workflows" type="button"><span>↝</span><b>مسارات العمل</b></button>
         <button class="nav-item" data-view="tools" type="button"><span>◫</span><b>دليل الأدوات</b></button>
@@ -161,6 +162,7 @@
       <section class="view" id="view-search" data-title="البحث الشامل">
         <div class="page-intro"><div><span class="section-kicker">بوصلة مِرْشاد</span><h2>ماذا تريد أن تفعل؟</h2><p>اكتب حاجتك بلغة عادية أو اختر مهمة. نعرض المسار والأدوات ذات الصلة مع توضيح الأسعار المتحقق منها وحدود التقييم.</p></div></div>
         <div id="intent-shortcuts" class="intent-shortcuts" aria-label="مهام سريعة"></div>
+        <button class="text-button" data-open-view="map" type="button">كيف أستخدم مِرْشاد؟ افتح الخريطة والبرومبتات ←</button>
         <form class="search-panel" id="global-search-form" role="search">
           <input id="global-search-input" type="search" aria-label="عبارة البحث" placeholder="اكتب اسم أداة، مهمة، مخرجًا أو كلمة عربية…" autocomplete="off">
           <button class="search-submit" type="submit">بحث</button>
@@ -176,6 +178,21 @@
         <div id="global-results"></div>
         <p class="search-caveat">الترتيب يدل على ملاءمة المهمة واكتمال المعلومات، ولا يقيس جودة المخرجات. تفاصيل الخطط تتغير؛ افتح المصدر الرسمي قبل قرار الشراء.</p>
         <a class="text-button" href="./study.html">فتح الدراسة الحية وفهرس المصادر ←</a>
+      </section>
+
+      <section class="view" id="view-map" data-title="خريطة الاستخدام والبرومبتات">
+        <div class="page-intro"><div><span class="section-kicker">دليل البدء العملي</span><h2>من السؤال إلى النتيجة</h2><p>اختر حاجتك، انسخ برومبتًا مناسبًا، ثم نفّذ عينة صغيرة وقارن مخرجات الأدوات. هذه خريطة عمل، وليست تشغيلًا تلقائيًا للخدمات.</p></div></div>
+        <ol class="use-map" aria-label="مراحل الاستخدام">
+          <li><strong>١ · حدّد النتيجة</strong><span>ماذا تريد؟ لمن؟ وبأي صيغة ومدة؟</span></li>
+          <li><strong>٢ · اختر الوظيفة</strong><span>افتح برومبت المهمة وعدّل الحقول بين الأقواس.</span></li>
+          <li><strong>٣ · اختر المسار</strong><span>اقرأ المراحل وبوابة الجودة والقرار البشري.</span></li>
+          <li><strong>٤ · جرّب الأداة</strong><span>راجع التعريف والسعر والمصدر؛ نفّذ عينة قصيرة.</span></li>
+          <li><strong>٥ · راجع وانشر</strong><span>تحقق من الحقيقة والعربية والحقوق ثم وثّق النتيجة.</span></li>
+        </ol>
+        <div class="section-heading"><div><span class="section-kicker">جاهزة للنسخ والتعديل</span><h2>برومبتات حسب الوظيفة</h2></div></div>
+        <div id="map-prompts" class="cards-grid"></div>
+        <p class="search-caveat">لكل واحد من مسارات العمل الـ24 برومبت بدء خاص بخطواته؛ افتح «مسارات العمل» لرؤيته ونسخه.</p>
+        <button class="secondary-action" data-open-view="workflows" type="button">تصفح المسارات الـ24 ←</button>
       </section>
 
       <section class="view" id="view-workflows" data-title="مسارات العمل">
@@ -243,6 +260,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=99a4aa5" defer></script>
+  <script src="./app.js?v=map1" defer></script>
 </body>
 </html>

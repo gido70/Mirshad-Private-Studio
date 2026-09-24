@@ -181,6 +181,10 @@ function renderHome() {
   updateVideoProgress();
 }
 
+function renderMap() {
+  qs('#map-prompts').innerHTML = state.guide.intents.map((item) => `<article class="workflow-card"><div class="card-head"><h3>${esc(item.title)}</h3></div><p class="card-copy">${esc(item.lead)}</p><div class="card-actions"><button class="open-detail" type="button" data-intent-prompt="${esc(item.id)}">افتح البرومبت والنصيحة ←</button><button class="text-button" type="button" data-intent-search="${esc(item.title)}">اعرض الأدوات</button></div></article>`).join('');
+}
+
 function renderWorkflows() {
   const query = normalizeArabic(qs('#workflow-search').value);
   const risk = qs('#workflow-risk').value;
@@ -274,6 +278,7 @@ function renderCurrentView() {
   if (!state.data) return;
   if (state.view === 'radar') renderRadar();
   if (state.view === 'home') renderHome();
+  if (state.view === 'map') renderMap();
   if (state.view === 'workflows') renderWorkflows();
   if (state.view === 'tools') renderTools();
   if (state.view === 'video') renderVideo();
@@ -290,8 +295,18 @@ function openWorkflow(id) {
   const prompt = `أنت مدير إنتاج وباحث متخصص. أريد تنفيذ مسار: «${item.title}».\n\nالمدخلات المتاحة: ${item.input}.\nابنِ لي خطة تنفيذ عملية وفق التسلسل: ${item.steps}.\nاجعل بوابة الجودة الإلزامية: ${item.gate}.\nوضح ما يجب أن يبقى قرارًا بشريًا: ${item.human}.\n\nأخرج النتيجة في جدول: المرحلة | المدخلات | الأداة المقترحة | المخرج | فحص الجودة | الخطر | قرار الإنسان.`;
   qs('#dialog-kicker').textContent = 'مسار عمل';
   qs('#dialog-title').textContent = item.title;
-  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>المدخلات</span><b>${esc(item.input)}</b></div><div class="dialog-row"><span>خطوات التنفيذ</span><b>${esc(item.steps)}</b></div><div class="dialog-row"><span>بوابة الجودة</span><b>${esc(item.gate)}</b></div><div class="dialog-row"><span>القرار البشري</span><b>${esc(item.human)}</b></div><div class="dialog-row"><span>برومبت البدء</span><pre class="prompt-box" id="active-prompt">${esc(prompt)}</pre></div>`;
+  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>المدخلات</span><b>${esc(item.input)}</b></div><div class="dialog-row"><span>خطوات التنفيذ</span><b>${esc(item.steps)}</b></div><div class="dialog-row"><span>بوابة الجودة</span><b>${esc(item.gate)}</b></div><div class="dialog-row"><span>القرار البشري</span><b>${esc(item.human)}</b></div><div class="dialog-row"><span>✅ برومبت البدء: عدّل المدخلات ثم انسخ</span><pre class="prompt-box" id="active-prompt">${esc(prompt)}</pre></div><div class="dialog-row"><span>🚫 تجنب هذا الخطأ</span><b>لا تختلق مدخلات أو مصادر، ولا تتجاوز بوابة الجودة: ${esc(item.gate)}.</b></div><div class="dialog-row"><span>💡 نصيحة تنفيذية</span><b>ابدأ بعينة صغيرة، ثم اترك القرار التالي لك: ${esc(item.human)}.</b></div>`;
   qs('#dialog-actions').innerHTML = `<button type="button" data-copy-prompt>نسخ البرومبت</button><button class="favorite-button ${isFavorite('workflows', item.id) ? 'saved' : ''}" data-favorite-type="workflows" data-favorite-id="${item.id}" type="button">${isFavorite('workflows', item.id) ? '♥ محفوظ' : '♡ حفظ'}</button>`;
+  qs('#detail-dialog').showModal();
+}
+
+function openIntentPrompt(id) {
+  const item = state.guide.intents.find((entry) => entry.id === id);
+  if (!item) return;
+  qs('#dialog-kicker').textContent = 'برومبت وظيفة';
+  qs('#dialog-title').textContent = item.title;
+  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>🎯 الاستخدام</span><b>${esc(item.lead)}</b></div><div class="dialog-row"><span>✅ البرومبت الجاهز: غيّر ما بين الأقواس</span><pre class="prompt-box" id="active-prompt">${esc(item.prompt)}</pre></div><div class="dialog-row"><span>🚫 تعليمات تمنع الأخطاء</span><b>${esc(item.avoid)}</b></div><div class="dialog-row"><span>💡 نصيحة قبل التنفيذ</span><b>${esc(item.tip)}</b></div>`;
+  qs('#dialog-actions').innerHTML = '<button type="button" data-copy-prompt>نسخ البرومبت</button><button type="button" data-intent-search="'+esc(item.title)+'">اعرض المسارات والأدوات</button>';
   qs('#detail-dialog').showModal();
 }
 
@@ -323,6 +338,10 @@ function bindEvents() {
     if (favorite) toggleFavorite(favorite.dataset.favoriteType, favorite.dataset.favoriteId);
     const workflow = event.target.closest('[data-workflow-id]');
     if (workflow) openWorkflow(workflow.dataset.workflowId);
+    const promptButton = event.target.closest('[data-intent-prompt]');
+    if (promptButton) openIntentPrompt(promptButton.dataset.intentPrompt);
+    const searchIntent = event.target.closest('[data-intent-search]');
+    if (searchIntent) { qs('#detail-dialog').close(); qs('#global-search-input').value = searchIntent.dataset.intentSearch; setView('search'); searchAll(); }
     const tool = event.target.closest('[data-tool-id]');
     if (tool) openTool(tool.dataset.toolId);
     const radarRead = event.target.closest('[data-radar-read]');

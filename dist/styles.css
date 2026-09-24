@@ -211,6 +211,11 @@ a { color: inherit; }
 .intent-answer strong { font-size: 1.2rem; }
 .intent-answer p { margin: 6px 0; }
 .intent-answer small, .search-caveat { color: var(--muted); font-size: .88rem; line-height: 1.7; }
+.use-map { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; list-style: none; margin: 20px 0 34px; padding: 0; }
+.use-map li { border: 1px solid var(--line); background: white; border-radius: 15px; padding: 16px; }
+.use-map strong, .use-map span { display: block; }
+.use-map strong { color: var(--teal-700); font-size: 1rem; }
+.use-map span { margin-top: 8px; font-size: .9rem; line-height: 1.7; }
 .search-caveat { margin: 24px 0 12px; }
 .journey-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 9px 0; color: var(--muted); font-size: .88rem; }
 .journey-nav button { border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--teal-700); padding: 6px 11px; font-weight: 700; }
@@ -230,7 +235,7 @@ a { color: inherit; }
 .evidence-B { color: #265f83; background: #eaf4fa; }
 .evidence-C { color: #875600; background: #fff4d7; }
 .evidence-H { color: #963a34; background: #fff0ed; }
-.card-copy { color: var(--muted); font-size: .8rem; margin: 8px 0 14px; }
+.card-copy { color: var(--muted); font-size: .9rem; margin: 8px 0 14px; }
 .card-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
 .card-meta span { color: #496371; background: #f1f6f8; border: 1px solid #e1ebef; border-radius: 999px; padding: 4px 8px; font-size: .65rem; }
 .card-actions { display: flex; justify-content: space-between; align-items: center; gap: 10px; border-top: 1px solid #edf2f4; margin-top: 15px; padding-top: 12px; }
@@ -300,6 +305,7 @@ dialog::backdrop { background: rgba(3,20,29,.62); backdrop-filter: blur(4px); }
 }
 
 @media (max-width: 900px) {
+  .use-map { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .sidebar { transform: translateX(110%); transition: transform .24s ease; box-shadow: -20px 0 70px rgba(3,25,36,.26); }
   .sidebar.open { transform: translateX(0); }
   .main-stage { margin-right: 0; padding: 0 20px 34px; }
@@ -312,6 +318,7 @@ dialog::backdrop { background: rgba(3,20,29,.62); backdrop-filter: blur(4px); }
 }
 
 @media (max-width: 680px) {
+  .use-map { grid-template-columns: 1fr; }
   body { font-size: 16px; padding-bottom: 74px; }
   .main-stage { padding: 0 13px 18px; }
   .topbar { min-height: 72px; }
