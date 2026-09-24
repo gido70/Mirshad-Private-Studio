@@ -1,8 +1,11 @@
 const state = {
   data: null,
-  view: 'home',
+  radar: null,
+  view: 'radar',
   favorites: JSON.parse(localStorage.getItem('mirshad:favorites') || '{"tools":[],"workflows":[]}'),
   videoDone: JSON.parse(localStorage.getItem('mirshad:video-progress') || '[]'),
+  radarRead: JSON.parse(localStorage.getItem('mirshad:radar-read') || '[]'),
+  radarUnreadOnly: false,
   toolLimit: 36,
   deferredInstall: null
 };
@@ -70,7 +73,7 @@ function toggleFavorite(type, id) {
 }
 
 function setView(view, updateHash = true) {
-  if (!qs(`#view-${view}`)) view = 'home';
+  if (!qs(`#view-${view}`)) view = 'radar';
   state.view = view;
   qsa('.view').forEach((node) => node.classList.toggle('active', node.id === `view-${view}`));
   qsa('[data-view]').forEach((button) => button.classList.toggle('active', button.dataset.view === view));
@@ -100,6 +103,58 @@ function toolCard(item) {
     <div class="card-meta"><span>${esc(item.categoryLabel)}</span><span>${esc(item.kind)}</span><span>${esc(item.access)}</span></div>
     <div class="card-actions"><button class="open-detail" data-tool-id="${item.id}" type="button">التفاصيل ←</button><button class="favorite-button ${saved ? 'saved' : ''}" data-favorite-type="tools" data-favorite-id="${item.id}" type="button" aria-label="${saved ? 'إزالة من المحفوظات' : 'حفظ'}">${saved ? '♥' : '♡'}</button></div>
   </article>`;
+}
+
+function formatArabicDate(value) {
+  if (!value) return 'غير محدد';
+  return new Intl.DateTimeFormat('ar-AE', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(`${value}T12:00:00`));
+}
+
+function radarCard(item) {
+  const isRead = state.radarRead.includes(item.id);
+  return `<article class="radar-card ${isRead ? 'read' : ''}">
+    <div class="radar-card-rail"><span class="radar-product">${esc(item.product)}</span><time datetime="${esc(item.date)}">${esc(formatArabicDate(item.date))}</time></div>
+    <div class="radar-card-body">
+      <div class="radar-card-top">
+        <div class="radar-tags"><span class="priority priority-${item.priority === 'عالية' ? 'high' : item.priority === 'متوسطة' ? 'medium' : 'low'}">${esc(item.priority)}</span><span>${esc(item.category)}</span><span>${esc(item.type)}</span></div>
+        ${isRead ? '<span class="read-state">مقروء</span>' : '<span class="new-state"><i></i> جديد</span>'}
+      </div>
+      <h3>${esc(item.title)}</h3>
+      <p class="radar-summary-copy">${esc(item.summary)}</p>
+      <div class="radar-impact"><span>لماذا يهمك؟</span><p>${esc(item.impact)}</p></div>
+      <div class="content-angle"><span>فكرة محتوى</span><p>${esc(item.contentIdea)}</p></div>
+      <div class="radar-facts"><span>العربية: ${esc(item.arabic)}</span><span>الوصول: ${esc(item.cost)}</span><span>القرار: ${esc(item.decision)}</span></div>
+      <div class="radar-card-actions"><a href="${esc(item.sourceUrl)}" target="_blank" rel="noopener">المصدر الرسمي ↗</a><button type="button" data-radar-read="${esc(item.id)}">${isRead ? 'إعادة إلى غير المقروء' : 'تعليم كمقروء'}</button></div>
+    </div>
+  </article>`;
+}
+
+function updateRadarMetrics() {
+  if (!state.radar) return;
+  const updates = state.radar.updates;
+  const unread = updates.filter((item) => !state.radarRead.includes(item.id));
+  qs('#radar-total').textContent = updates.length;
+  qs('#radar-high').textContent = updates.filter((item) => item.priority === 'عالية').length;
+  qs('#radar-content-count').textContent = updates.filter((item) => item.contentIdea).length;
+  qs('#radar-unread').textContent = unread.length;
+  qs('#radar-nav-badge').hidden = unread.length === 0;
+  qs('#radar-nav-badge').textContent = unread.length;
+}
+
+function renderRadar() {
+  if (!state.radar) return;
+  const category = qs('#radar-category').value;
+  const priority = qs('#radar-priority').value;
+  const filtered = state.radar.updates.filter((item) => {
+    const unreadMatch = !state.radarUnreadOnly || !state.radarRead.includes(item.id);
+    return unreadMatch && (category === 'all' || item.category === category) && (priority === 'all' || item.priority === priority);
+  });
+  qs('#radar-cycle').textContent = state.radar.cycle;
+  qs('#radar-updated-at').textContent = formatArabicDate(state.radar.generatedAt);
+  qs('#radar-summary').textContent = `${filtered.length} مستجدًا ظاهرًا من أصل ${state.radar.updates.length}`;
+  qs('#radar-list').innerHTML = filtered.length ? filtered.map(radarCard).join('') : emptyState('لا توجد مستجدات مطابقة', 'أزل المرشحات أو اعرض جميع العناصر.');
+  qs('#radar-unread-only').textContent = state.radarUnreadOnly ? 'عرض جميع المستجدات' : 'عرض غير المقروء';
+  updateRadarMetrics();
 }
 
 function renderHome() {
@@ -185,6 +240,7 @@ function renderFavorites() {
 
 function renderCurrentView() {
   if (!state.data) return;
+  if (state.view === 'radar') renderRadar();
   if (state.view === 'home') renderHome();
   if (state.view === 'workflows') renderWorkflows();
   if (state.view === 'tools') renderTools();
@@ -234,6 +290,14 @@ function bindEvents() {
     if (workflow) openWorkflow(workflow.dataset.workflowId);
     const tool = event.target.closest('[data-tool-id]');
     if (tool) openTool(tool.dataset.toolId);
+    const radarRead = event.target.closest('[data-radar-read]');
+    if (radarRead) {
+      const id = radarRead.dataset.radarRead;
+      if (state.radarRead.includes(id)) state.radarRead = state.radarRead.filter((item) => item !== id);
+      else state.radarRead.push(id);
+      localStorage.setItem('mirshad:radar-read', JSON.stringify(state.radarRead));
+      renderRadar();
+    }
     const quick = event.target.closest('[data-quick-search]');
     if (quick) {
       qs('#global-search-input').value = quick.dataset.quickSearch;
@@ -272,6 +336,15 @@ function bindEvents() {
     renderVideo();
   });
   qs('#reset-video').addEventListener('click', () => { state.videoDone = []; localStorage.setItem('mirshad:video-progress', '[]'); renderVideo(); toast('بدأت التجربة من جديد'); });
+  qs('#radar-category').addEventListener('change', renderRadar);
+  qs('#radar-priority').addEventListener('change', renderRadar);
+  qs('#radar-unread-only').addEventListener('click', () => { state.radarUnreadOnly = !state.radarUnreadOnly; renderRadar(); });
+  qs('#radar-mark-all').addEventListener('click', () => {
+    state.radarRead = state.radar.updates.map((item) => item.id);
+    localStorage.setItem('mirshad:radar-read', JSON.stringify(state.radarRead));
+    renderRadar();
+    toast('تم تعليم مستجدات الرادار كمقروءة');
+  });
   qs('#dialog-close').addEventListener('click', () => qs('#detail-dialog').close());
   qs('#detail-dialog').addEventListener('click', (event) => { if (event.target === qs('#detail-dialog')) qs('#detail-dialog').close(); });
   window.addEventListener('hashchange', () => setView(location.hash.slice(1) || 'home', false));
@@ -290,16 +363,19 @@ function bindEvents() {
 
 async function init() {
   try {
-    const response = await fetch('./data.json');
-    if (!response.ok) throw new Error('تعذر تحميل البيانات');
-    state.data = await response.json();
+    const [dataResponse, radarResponse] = await Promise.all([fetch('./data.json'), fetch('./radar.json')]);
+    if (!dataResponse.ok || !radarResponse.ok) throw new Error('تعذر تحميل البيانات');
+    state.data = await dataResponse.json();
+    state.radar = await radarResponse.json();
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     qs('#ios-install-button').hidden = !(isIos && !isStandalone);
     const categorySelect = qs('#tool-category');
     Object.entries(state.data.categories).forEach(([value, label]) => categorySelect.insertAdjacentHTML('beforeend', `<option value="${esc(value)}">${esc(label)}</option>`));
+    const radarCategory = qs('#radar-category');
+    [...new Set(state.radar.updates.map((item) => item.category))].sort().forEach((label) => radarCategory.insertAdjacentHTML('beforeend', `<option value="${esc(label)}">${esc(label)}</option>`));
     bindEvents();
-    setView(location.hash.slice(1) || 'home', false);
+    setView(location.hash.slice(1) || 'radar', false);
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {});
   } catch (error) {
     document.body.innerHTML = `<main class="empty-state" style="margin:3rem"><strong>تعذر فتح استوديو مِرْشاد</strong><span>${esc(error.message)}</span></main>`;

@@ -28,7 +28,8 @@
       </div>
 
       <nav class="side-nav">
-        <button class="nav-item active" data-view="home" type="button"><span>⌂</span><b>الرئيسية</b></button>
+        <button class="nav-item active" data-view="radar" type="button"><span>◉</span><b>رادار المستجدات</b><i class="nav-badge" id="radar-nav-badge" hidden>0</i></button>
+        <button class="nav-item" data-view="home" type="button"><span>⌂</span><b>الاستوديو</b></button>
         <button class="nav-item" data-view="search" type="button"><span>⌕</span><b>البحث الشامل</b></button>
         <button class="nav-item" data-view="workflows" type="button"><span>↝</span><b>مسارات العمل</b></button>
         <button class="nav-item" data-view="tools" type="button"><span>◫</span><b>دليل الأدوات</b></button>
@@ -38,7 +39,7 @@
 
       <div class="sidebar-note">
         <span class="lock-dot"></span>
-        <div><strong>مساحة خاصة</strong><small>لا نشر تلقائي للمحتوى</small></div>
+        <div><strong>مراجعة بشرية</strong><small>لا إضافة قبل موافقتك</small></div>
       </div>
     </aside>
 
@@ -47,7 +48,7 @@
         <button class="icon-button menu-button" id="menu-button" type="button" aria-label="فتح القائمة" aria-expanded="false">☰</button>
         <div class="topbar-title">
           <span class="eyebrow">استوديو مِرْشاد للمحتوى الذكي</span>
-          <h1 id="page-title">ماذا تريد أن تنجز اليوم؟</h1>
+          <h1 id="page-title">رادار مِرْشاد الأسبوعي</h1>
         </div>
         <div class="topbar-actions">
           <span class="version-pill">V1.0</span>
@@ -56,7 +57,50 @@
         </div>
       </header>
 
-      <section class="view active" id="view-home" data-title="ماذا تريد أن تنجز اليوم؟">
+      <section class="view active" id="view-radar" data-title="رادار مِرْشاد الأسبوعي">
+        <div class="radar-hero">
+          <div class="radar-hero-copy">
+            <span class="radar-live"><i></i> رصد موثّق للمستجدات</span>
+            <h2>كل جديد يستحق وقتك، في صفحة واحدة</h2>
+            <p>تحديثات الأدوات والنماذج، أثرها العملي، والمادة التي تصلح لفيديو أو فقرة إذاعية — من المصادر الرسمية أولًا.</p>
+            <div class="radar-hero-actions">
+              <button class="primary-action" id="radar-unread-only" type="button">عرض غير المقروء</button>
+              <button class="radar-ghost" id="radar-mark-all" type="button">تعليم الكل كمقروء</button>
+            </div>
+          </div>
+          <div class="radar-cycle-card">
+            <span>الدورة الحالية</span>
+            <strong id="radar-cycle">—</strong>
+            <small>الفحص القادم: الأحد 9:00 صباحًا بتوقيت دبي</small>
+          </div>
+        </div>
+
+        <div class="radar-metrics" aria-label="ملخص الرادار">
+          <article><span>مستجدات موثقة</span><strong id="radar-total">—</strong><small>في آخر مراجعة</small></article>
+          <article><span>عالية الأهمية</span><strong id="radar-high">—</strong><small>ابدأ بها أولًا</small></article>
+          <article><span>أفكار محتوى</span><strong id="radar-content-count">—</strong><small>لفيديو أو فقرة إذاعية</small></article>
+          <article class="unread"><span>غير مقروء</span><strong id="radar-unread">—</strong><small>محفوظ على هذا الجهاز</small></article>
+        </div>
+
+        <section class="radar-board">
+          <div class="section-heading radar-heading">
+            <div><span class="section-kicker">آخر تحديث: <b id="radar-updated-at">—</b></span><h2>حصيلة الرادار</h2></div>
+            <div class="radar-filters">
+              <select id="radar-category" aria-label="تصنيف المستجدات"><option value="all">كل المجالات</option></select>
+              <select id="radar-priority" aria-label="درجة الأهمية"><option value="all">كل الدرجات</option><option value="عالية">عالية</option><option value="متوسطة">متوسطة</option><option value="منخفضة">منخفضة</option></select>
+            </div>
+          </div>
+          <p class="result-summary" id="radar-summary"></p>
+          <div class="radar-list" id="radar-list"></div>
+        </section>
+
+        <aside class="radar-policy">
+          <span>قاعدة مِرْشاد</span>
+          <p>الرادار يرصد ويقيّم ويقترح. لا تُضاف أداة إلى الدليل ولا يُعدّل سجل موجود حتى تراجعها وتوافق عليها.</p>
+        </aside>
+      </section>
+
+      <section class="view" id="view-home" data-title="ماذا تريد أن تنجز اليوم؟">
         <div class="command-card">
           <div class="command-copy">
             <span class="section-kicker">ابدأ من حاجتك، لا من الأداة</span>
@@ -174,9 +218,9 @@
   </div>
 
   <nav class="mobile-nav" aria-label="التنقل على الهاتف">
-    <button class="active" data-view="home" type="button"><span>⌂</span><b>الرئيسية</b></button>
+    <button class="active" data-view="radar" type="button"><span>◉</span><b>الرادار</b></button>
+    <button data-view="home" type="button"><span>⌂</span><b>الاستوديو</b></button>
     <button data-view="search" type="button"><span>⌕</span><b>بحث</b></button>
-    <button data-view="workflows" type="button"><span>↝</span><b>المسارات</b></button>
     <button data-view="tools" type="button"><span>◫</span><b>الأدوات</b></button>
     <button data-view="video" type="button"><span>▶</span><b>الفيديو</b></button>
   </nav>

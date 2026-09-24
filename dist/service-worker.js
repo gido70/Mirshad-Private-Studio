@@ -1,5 +1,5 @@
-const CACHE = 'mirshad-private-v1';
-const CORE = ['./', './index.html', './styles.css', './app.js', './data.json', './manifest.webmanifest', './icons/mirshad.svg'];
+const CACHE = 'mirshad-private-v2-radar';
+const CORE = ['./', './index.html', './styles.css', './app.js', './data.json', './radar.json', './manifest.webmanifest', './icons/mirshad.svg'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(CORE)));
