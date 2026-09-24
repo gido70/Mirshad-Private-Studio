@@ -20,6 +20,7 @@ if (new Set(data.tools.map((item) => item.name.toLowerCase())).size !== data.too
 if (new Set(data.workflows.map((item) => item.id)).size !== data.workflows.length) throw new Error('Duplicate workflow IDs');
 for (const intent of guide.intents) {
   if (!intent.terms.length || !intent.categories.length) throw new Error(`Incomplete intent: ${intent.id}`);
+  if (!intent.prompt || !intent.avoid || !intent.tip) throw new Error(`Missing prompt guidance: ${intent.id}`);
   for (const category of intent.categories) if (!(category in data.categories)) throw new Error(`Unknown category: ${category}`);
   for (const id of intent.workflowIds) if (!data.workflows.some((workflow) => workflow.id === id)) throw new Error(`Unknown workflow: ${id}`);
 }
@@ -37,7 +38,7 @@ for (const item of radar.updates) {
 }
 
 const html = read('index.html');
-for (const id of ['main', 'view-radar', 'view-home', 'view-search', 'view-workflows', 'view-tools', 'view-video', 'view-favorites', 'detail-dialog']) {
+for (const id of ['main', 'view-radar', 'view-home', 'view-map', 'view-search', 'view-workflows', 'view-tools', 'view-video', 'view-favorites', 'detail-dialog']) {
   if (!html.includes(`id="${id}"`)) throw new Error(`Missing HTML landmark: ${id}`);
 }
 if (!html.includes('lang="ar" dir="rtl"')) throw new Error('Arabic RTL document settings missing');
