@@ -5,7 +5,7 @@
 const escapeHtml=(s)=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 Promise.all(['data.json','radar.json','guide.json'].map(p=>fetch('./'+p).then(r=>{if(!r.ok)throw Error(p);return r.json()}))).then(([data,radar,guide])=>{
  document.querySelector('#summary').innerHTML=[['الأدوات',data.tools.length],['المجالات',Object.keys(data.categories).length],['مسارات العمل',data.workflows.length],['مستجدات الرادار',radar.updates.length]].map(([title,count])=>`<article><strong>${count}</strong>${title}</article>`).join('');
- document.querySelector('#categories').innerHTML='<ul>'+Object.entries(data.categories).map(([id,label])=>`<li><a href="./#tools">${escapeHtml(label)}</a>: ${data.tools.filter(t=>t.category===id).length} أداة</li>`).join('')+'</ul>';
+ document.querySelector('#categories').innerHTML='<ul>'+Object.entries(data.categories).map(([id,label])=>`<li><a href="./?category=${encodeURIComponent(id)}#tools">${escapeHtml(label)}</a>: ${data.tools.filter(t=>t.category===id).length} أداة</li>`).join('')+'</ul>';
  document.querySelector('#policy').textContent=guide.rankingPolicy;
  document.querySelector('#review-date').textContent=guide.reviewedAt;
  document.querySelector('#prices').innerHTML=Object.entries(guide.pricing).map(([name,item])=>`<tr><th>${escapeHtml(name)}</th><td>${escapeHtml(item.use)}</td><td>${escapeHtml(item.tier)}</td><td>${escapeHtml(item.detail)}</td><td><a href="${escapeHtml(item.source)}" target="_blank" rel="noopener">رسمي ↗</a></td></tr>`).join('');

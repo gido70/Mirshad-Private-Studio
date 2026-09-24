@@ -242,7 +242,7 @@ function searchAll() {
     target.innerHTML = emptyState('لم أجد نتيجة مطابقة', 'استخدم كلمة أقصر مثل: فيديو، صوت، بحث، ترجمة أو عرض.');
     return;
   }
-  target.innerHTML = `${intent ? `<div class="intent-answer"><strong>${esc(intent.title)}</strong><p>${esc(intent.lead)}</p><small>${esc(state.guide.rankingPolicy)}</small></div>` : ''}${workflows.length ? `<section class="result-group"><h3>ابدأ بمسار العمل (${workflows.length})</h3><div class="cards-grid">${workflows.slice(0, 12).map(workflowCard).join('')}</div></section>` : ''}${tools.length ? `<section class="result-group"><h3>أدوات مناسبة (${tools.length})</h3><div class="cards-grid tools">${tools.slice(0, 30).map(toolCard).join('')}</div></section>` : ''}`;
+  target.innerHTML = `${intent ? `<div class="intent-answer"><strong>${esc(intent.title)}</strong><p>${esc(intent.lead)}</p><small>${esc(state.guide.rankingPolicy)}</small>${intent.id === 'video' ? '<div><button class="primary-action" type="button" data-open-view="video">افتح مختبر الفيديو وابدأ التجربة ←</button></div>' : ''}</div>` : ''}${workflows.length ? `<section class="result-group"><h3>ابدأ بمسار العمل (${workflows.length})</h3><div class="cards-grid">${workflows.slice(0, 12).map(workflowCard).join('')}</div></section>` : ''}${tools.length ? `<section class="result-group"><h3>أدوات مناسبة (${tools.length})</h3><div class="cards-grid tools">${tools.slice(0, 30).map(toolCard).join('')}</div></section>` : ''}`;
 }
 
 function renderVideo() {
@@ -416,6 +416,8 @@ async function init() {
     qs('#ios-install-button').hidden = !(isIos && !isStandalone);
     const categorySelect = qs('#tool-category');
     Object.entries(state.data.categories).forEach(([value, label]) => categorySelect.insertAdjacentHTML('beforeend', `<option value="${esc(value)}">${esc(label)}</option>`));
+    const requestedCategory = new URLSearchParams(location.search).get('category');
+    if (requestedCategory && requestedCategory in state.data.categories) categorySelect.value = requestedCategory;
     Object.entries(state.data.categories).forEach(([value, label]) => qs('#search-category').insertAdjacentHTML('beforeend', `<option value="${esc(value)}">${esc(label)}</option>`));
     qs('#intent-shortcuts').innerHTML = state.guide.intents.map((item) => `<button type="button" data-intent="${esc(item.title)}">${esc(item.title)}</button>`).join('');
     const radarCategory = qs('#radar-category');
