@@ -56,6 +56,7 @@
           <button class="install-button" id="ios-install-button" type="button" hidden>إضافة للآيفون</button>
         </div>
       </header>
+      <nav class="journey-nav" aria-label="مسار التنقل"><button id="journey-back" type="button">رجوع</button><div id="journey-trail" class="journey-trail"></div><button id="journey-home" type="button">الرئيسية</button></nav>
 
       <section class="view active" id="view-radar" data-title="رادار مِرْشاد الأسبوعي">
         <div class="radar-hero">
@@ -159,10 +160,11 @@
 
       <section class="view" id="view-search" data-title="البحث الشامل">
         <div class="page-intro"><div><span class="section-kicker">نتيجة واحدة من كل الاستوديو</span><h2>ابحث في الأدوات والمسارات</h2></div></div>
-        <div class="search-panel">
-          <input id="global-search-input" type="search" placeholder="اكتب اسم أداة، مهمة، مخرجًا أو كلمة عربية…" autocomplete="off">
+        <form class="search-panel" id="global-search-form" role="search">
+          <input id="global-search-input" type="search" aria-label="عبارة البحث" placeholder="اكتب اسم أداة، مهمة، مخرجًا أو كلمة عربية…" autocomplete="off">
+          <button class="search-submit" type="submit">بحث</button>
           <button id="global-search-clear" type="button">مسح</button>
-        </div>
+        </form>
         <p class="result-summary" id="global-search-summary">اكتب كلمة للبحث في الاستوديو.</p>
         <div id="global-results"></div>
       </section>
@@ -178,9 +180,9 @@
       </section>
 
       <section class="view" id="view-tools" data-title="دليل الأدوات">
-        <div class="page-intro"><div><span class="section-kicker">سجل معرفي منظم</span><h2>الأدوات والنماذج</h2><p>وجود الأداة في السجل لا يعني أنها مختبرة. اقرأ درجة الثقة والحالة قبل اعتمادها.</p></div></div>
+        <div class="page-intro"><div><span class="section-kicker">سجل معرفي منظم</span><h2>الأدوات والنماذج</h2><p>كل بطاقة تعريف مختصر ووظيفة ورابط ودرجة ثقة. الأدوات هنا مفهرسة للقراءة والاختيار؛ تشغيلها يتم في مواقعها، وبعد اختبارها على عمل حقيقي.</p></div></div>
         <div class="filter-bar tool-filters">
-          <input id="tool-search" type="search" placeholder="ابحث باسم الأداة أو وظيفتها…">
+          <div class="tool-search-field"><input id="tool-search" type="search" aria-label="بحث في الأدوات" placeholder="اسم الأداة أو وظيفتها…"><button id="tool-search-submit" class="search-submit" type="button">بحث</button></div>
           <select id="tool-category" aria-label="المجال"><option value="all">كل المجالات</option></select>
           <select id="tool-evidence" aria-label="درجة الثقة"><option value="all">كل درجات الثقة</option><option value="A">A — متحقق</option><option value="B">B — رسمي جزئيًا</option><option value="C">C — يحتاج اختبارًا</option><option value="H">H — حجر تحقق</option></select>
         </div>

@@ -74,15 +74,28 @@ function toggleFavorite(type, id) {
 
 function setView(view, updateHash = true) {
   if (!qs(`#view-${view}`)) view = 'radar';
+  if (updateHash && (state.view !== view || location.hash !== `#${view}`)) {
+    const trail = [...(history.state?.mirshadTrail || [state.view]), view];
+    history.pushState({ mirshadTrail: trail }, '', `#${view}`);
+  }
   state.view = view;
   qsa('.view').forEach((node) => node.classList.toggle('active', node.id === `view-${view}`));
   qsa('[data-view]').forEach((button) => button.classList.toggle('active', button.dataset.view === view));
   qs('#page-title').textContent = qs(`#view-${view}`).dataset.title;
   qs('#sidebar').classList.remove('open');
   qs('#menu-button').setAttribute('aria-expanded', 'false');
-  if (updateHash) history.replaceState(null, '', `#${view}`);
+  renderJourney();
   window.scrollTo({ top: 0, behavior: 'smooth' });
   renderCurrentView();
+}
+
+function renderJourney() {
+  const trail = history.state?.mirshadTrail || [state.view];
+  qs('#journey-trail').innerHTML = trail.map((view, index) => {
+    const title = qs(`#view-${view}`)?.dataset.title || view;
+    return `<button type="button" data-journey-index="${index}" ${index === trail.length - 1 ? 'aria-current="page"' : ''}>${esc(title)}</button>`;
+  }).join('<span aria-hidden="true">‹</span>');
+  qs('#journey-back').disabled = trail.length <= 1;
 }
 
 function workflowCard(item) {
@@ -268,8 +281,8 @@ function openTool(id) {
   if (!item) return;
   qs('#dialog-kicker').textContent = item.categoryLabel;
   qs('#dialog-title').textContent = item.name;
-  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>ما هي؟</span><b>${esc(item.kind)}</b></div><div class="dialog-row"><span>طريقة الوصول</span><b>${esc(item.access)}</b></div><div class="dialog-row"><span>ما الذي نعرفه الآن؟</span><b>${esc(item.note)}</b></div><div class="dialog-row"><span>درجة الثقة</span><b>${esc(item.evidence)} — ${esc(item.status)}</b></div><div class="dialog-row"><span>قاعدة مِرْشاد</span><b>لا تُعتمد الأداة لمجرد وجودها في السجل. يجب اختبارها على عينة حقيقية وتوثيق الإصدار والنتيجة.</b></div>`;
-  qs('#dialog-actions').innerHTML = `${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">فتح الموقع الرسمي</a>` : ''}<button class="favorite-button ${isFavorite('tools', item.id) ? 'saved' : ''}" data-favorite-type="tools" data-favorite-id="${item.id}" type="button">${isFavorite('tools', item.id) ? '♥ محفوظ' : '♡ حفظ'}</button>`;
+  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>تعريف الأداة ومجالها</span><b>${esc(item.name)}: ${esc(item.kind)} · ${esc(item.categoryLabel)}</b></div><div class="dialog-row"><span>ماذا تفعل وما فائدتها؟</span><b>${esc(item.note)}</b></div><div class="dialog-row"><span>طريقة الوصول</span><b>${esc(item.access)}</b></div><div class="dialog-row"><span>التقييم وحالة التحقق</span><b>${esc(item.evidence)} — ${esc(item.status)}</b></div><div class="dialog-row"><span>قبل الاستخدام</span><b>هذا وصف في الدليل وليس تشغيلًا مدمجًا. افتح صفحة الأداة، ثم اختبر فائدتها على عينة حقيقية ووثّق الجودة والتكلفة والقيود.</b></div>`;
+  qs('#dialog-actions').innerHTML = `${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">زيارة صفحة الأداة ↗</a>` : ''}<button class="favorite-button ${isFavorite('tools', item.id) ? 'saved' : ''}" data-favorite-type="tools" data-favorite-id="${item.id}" type="button">${isFavorite('tools', item.id) ? '♥ محفوظ' : '♡ حفظ'}</button>`;
   qs('#detail-dialog').showModal();
 }
 
@@ -282,6 +295,8 @@ async function copyPrompt() {
 
 function bindEvents() {
   document.addEventListener('click', (event) => {
+    const journey = event.target.closest('[data-journey-index]');
+    if (journey) { history.go(Number(journey.dataset.journeyIndex) - (history.state?.mirshadTrail?.length || 1) + 1); return; }
     const viewButton = event.target.closest('[data-view], [data-open-view]');
     if (viewButton) setView(viewButton.dataset.view || viewButton.dataset.openView);
     const favorite = event.target.closest('[data-favorite-type]');
@@ -319,10 +334,14 @@ function bindEvents() {
     searchAll();
   });
   qs('#global-search-input').addEventListener('input', searchAll);
+  qs('#global-search-form').addEventListener('submit', (event) => { event.preventDefault(); searchAll(); });
   qs('#global-search-clear').addEventListener('click', () => { qs('#global-search-input').value = ''; searchAll(); qs('#global-search-input').focus(); });
   qs('#workflow-search').addEventListener('input', renderWorkflows);
   qs('#workflow-risk').addEventListener('change', renderWorkflows);
   ['#tool-search', '#tool-category', '#tool-evidence'].forEach((selector) => qs(selector).addEventListener(selector === '#tool-search' ? 'input' : 'change', () => renderTools(true)));
+  qs('#tool-search-submit').addEventListener('click', () => renderTools(true));
+  qs('#journey-back').addEventListener('click', () => { if ((history.state?.mirshadTrail?.length || 1) > 1) history.back(); });
+  qs('#journey-home').addEventListener('click', () => setView('radar'));
   qs('#reset-tools').addEventListener('click', () => { qs('#tool-search').value = ''; qs('#tool-category').value = 'all'; qs('#tool-evidence').value = 'all'; renderTools(true); });
   qs('#load-more-tools').addEventListener('click', () => { state.toolLimit += 36; renderTools(); });
   qs('#video-steps').addEventListener('change', (event) => {
@@ -347,7 +366,8 @@ function bindEvents() {
   });
   qs('#dialog-close').addEventListener('click', () => qs('#detail-dialog').close());
   qs('#detail-dialog').addEventListener('click', (event) => { if (event.target === qs('#detail-dialog')) qs('#detail-dialog').close(); });
-  window.addEventListener('hashchange', () => setView(location.hash.slice(1) || 'home', false));
+  window.addEventListener('popstate', () => setView(location.hash.slice(1) || 'radar', false));
+  window.addEventListener('hashchange', () => setView(location.hash.slice(1) || 'radar', false));
   window.addEventListener('beforeinstallprompt', (event) => { event.preventDefault(); state.deferredInstall = event; qs('#install-button').hidden = false; });
   qs('#install-button').addEventListener('click', async () => {
     if (!state.deferredInstall) return;
@@ -375,6 +395,7 @@ async function init() {
     const radarCategory = qs('#radar-category');
     [...new Set(state.radar.updates.map((item) => item.category))].sort().forEach((label) => radarCategory.insertAdjacentHTML('beforeend', `<option value="${esc(label)}">${esc(label)}</option>`));
     bindEvents();
+    history.replaceState({ mirshadTrail: [qs(`#view-${location.hash.slice(1)}`) ? location.hash.slice(1) : 'radar'] }, '', location.href);
     setView(location.hash.slice(1) || 'radar', false);
     if ('serviceWorker' in navigator) navigator.serviceWorker.register('./service-worker.js').catch(() => {});
   } catch (error) {
