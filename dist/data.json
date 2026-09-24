@@ -4681,6 +4681,42 @@
       "note": "مخططات وتصميم واجهات؛ راجع قابلية التصدير.",
       "url": "https://uxpilot.ai/",
       "status": "مرشح نشط"
+    },
+    {
+      "id": 389,
+      "name": "Teal",
+      "category": "docs",
+      "categoryLabel": "المستندات والعروض",
+      "kind": "سير ذاتية",
+      "access": "سحابي",
+      "evidence": "B",
+      "note": "بناء السيرة وتتبع التقديم؛ راجع الخصوصية وصحة البيانات.",
+      "url": "https://www.tealhq.com/",
+      "status": "مرشح نشط"
+    },
+    {
+      "id": 390,
+      "name": "Noty.ai",
+      "category": "work",
+      "categoryLabel": "إدارة العمل والتعاون",
+      "kind": "محاضر اجتماعات",
+      "access": "سحابي",
+      "evidence": "B",
+      "note": "تلخيص الاجتماعات والإجراءات؛ احصل على موافقة التسجيل.",
+      "url": "https://noty.ai/",
+      "status": "مرشح نشط"
+    },
+    {
+      "id": 391,
+      "name": "UiMagic",
+      "category": "web",
+      "categoryLabel": "بناء المواقع والتطبيقات",
+      "kind": "بناء تطبيقات",
+      "access": "سحابي",
+      "evidence": "B",
+      "note": "بناء تطبيقات من وصف نصي؛ اختبر جودة المخرجات والتصدير.",
+      "url": "https://www.uimagic.io/",
+      "status": "مرشح نشط"
     }
   ],
   "workflows": [
