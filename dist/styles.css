@@ -202,6 +202,16 @@ a { color: inherit; }
 .search-panel { grid-template-columns: minmax(0,1fr) auto auto; }
 .search-panel button { border: 0; padding: 0 18px; border-radius: 12px; color: var(--teal-700); background: var(--teal-100); font-weight: 700; }
 .search-panel .search-submit, .tool-search-field .search-submit { border: 0; padding: 9px 20px; min-height: 44px; border-radius: 12px; color: white; background: var(--teal-700); font-weight: 700; }
+.intent-shortcuts { display: flex; gap: 9px; flex-wrap: wrap; margin: 14px 0; }
+.intent-shortcuts button { border: 1px solid var(--line); background: white; color: var(--teal-700); padding: 10px 15px; border-radius: 999px; font-weight: 700; }
+.intent-shortcuts button:hover, .intent-shortcuts button:focus-visible { border-color: var(--teal-700); background: var(--teal-100); }
+.search-refine { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; margin: 12px 0; }
+.search-refine select { min-width: 0; border: 1px solid var(--line); border-radius: 11px; background: white; color: var(--ink); padding: 10px; }
+.intent-answer { border: 1px solid #cce4e5; background: #edfaf8; padding: 17px 20px; border-radius: 17px; }
+.intent-answer strong { font-size: 1.2rem; }
+.intent-answer p { margin: 6px 0; }
+.intent-answer small, .search-caveat { color: var(--muted); font-size: .88rem; line-height: 1.7; }
+.search-caveat { margin: 24px 0 12px; }
 .journey-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 9px 0; color: var(--muted); font-size: .88rem; }
 .journey-nav button { border: 1px solid var(--line); border-radius: 10px; background: white; color: var(--teal-700); padding: 6px 11px; font-weight: 700; }
 .journey-nav button:disabled { opacity: .5; cursor: default; }
@@ -341,6 +351,7 @@ dialog::backdrop { background: rgba(3,20,29,.62); backdrop-filter: blur(4px); }
   .search-panel { gap: 6px; }
   .search-panel button { padding: 8px 12px; }
   .search-panel input { grid-column: 1 / -1; }
+  .search-refine { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .journey-nav { font-size: .83rem; }
   .journey-trail { max-width: 100%; }
   .video-intro { display: grid; gap: 12px; }

@@ -1,6 +1,7 @@
 const state = {
   data: null,
   radar: null,
+  guide: null,
   view: 'radar',
   favorites: JSON.parse(localStorage.getItem('mirshad:favorites') || '{"tools":[],"workflows":[]}'),
   videoDone: JSON.parse(localStorage.getItem('mirshad:video-progress') || '[]'),
@@ -110,10 +111,11 @@ function workflowCard(item) {
 
 function toolCard(item) {
   const saved = isFavorite('tools', item.id);
+  const price = state.guide?.pricing[item.name];
   return `<article class="tool-card">
     <div class="card-head"><h3 dir="auto">${esc(item.name)}</h3><span class="evidence evidence-${item.evidence}">${esc(item.evidence)}</span></div>
     <p class="card-copy">${esc(item.note)}</p>
-    <div class="card-meta"><span>${esc(item.categoryLabel)}</span><span>${esc(item.kind)}</span><span>${esc(item.access)}</span></div>
+    <div class="card-meta"><span>${esc(item.categoryLabel)}</span><span>${esc(item.kind)}</span><span>${esc(price?.tier || 'السعر غير موثق')}</span></div>
     <div class="card-actions"><button class="open-detail" data-tool-id="${item.id}" type="button">التفاصيل ←</button><button class="favorite-button ${saved ? 'saved' : ''}" data-favorite-type="tools" data-favorite-id="${item.id}" type="button" aria-label="${saved ? 'إزالة من المحفوظات' : 'حفظ'}">${saved ? '♥' : '♡'}</button></div>
   </article>`;
 }
@@ -211,19 +213,36 @@ function searchAll() {
   const input = qs('#global-search-input');
   const query = normalizeArabic(input.value);
   const target = qs('#global-results');
+  const selectedCategory = qs('#search-category').value;
+  const priceFilter = qs('#search-pricing').value;
+  const evidenceFilter = qs('#search-evidence').value;
+  const sort = qs('#search-sort').value;
   if (!query) {
-    qs('#global-search-summary').textContent = 'اكتب كلمة للبحث في الاستوديو.';
+    qs('#global-search-summary').textContent = 'اختر مهمة أو اكتب ما تريد إنجازه.';
     target.innerHTML = '';
     return;
   }
-  const tools = state.data.tools.filter((item) => normalizeArabic(`${item.name} ${item.categoryLabel} ${item.kind} ${item.access} ${item.note}`).includes(query));
-  const workflows = state.data.workflows.filter((item) => normalizeArabic(`${item.title} ${item.input} ${item.steps} ${item.gate} ${item.human}`).includes(query));
-  qs('#global-search-summary').textContent = `${tools.length + workflows.length} نتيجة: ${workflows.length} مسار و${tools.length} أداة.`;
+  const intent = state.guide.intents.find((entry) => entry.terms.some((term) => query.includes(normalizeArabic(term))));
+  const terms = query.split(/\s+/).filter((word) => word.length > 2 && !['اريد','افضل','موقع','مواقع','انشاء','عمل','لدي','كيف','يمكن'].includes(word));
+  const matches = (value) => terms.length && terms.every((term) => normalizeArabic(value).includes(term));
+  const scored = state.data.tools.map((item) => {
+    const ownText = `${item.name} ${item.categoryLabel} ${item.kind} ${item.note}`;
+    const categoryMatch = intent?.categories.includes(item.category);
+    const exact = matches(ownText);
+    const price = state.guide.pricing[item.name];
+    const score = (exact ? 100 : 0) + (categoryMatch ? 40 - intent.categories.indexOf(item.category) * 4 : 0) + (price ? 3 : 0) + (item.evidence === 'A' ? 2 : item.evidence === 'B' ? 1 : 0);
+    return {item, score};
+  }).filter(({item,score}) => score > 2 && (intent || matches(`${item.name} ${item.categoryLabel} ${item.kind} ${item.note}`)))
+    .filter(({item}) => (selectedCategory === 'all' || item.category === selectedCategory) && (priceFilter === 'all' || (priceFilter === 'free' ? !!state.guide.pricing[item.name]?.tier.includes('مجاني') : !state.guide.pricing[item.name])) && (evidenceFilter === 'all' || item.evidence === evidenceFilter));
+  scored.sort((a,b) => sort === 'name' ? a.item.name.localeCompare(b.item.name,'ar') : b.score - a.score || a.item.name.localeCompare(b.item.name,'ar'));
+  const tools = scored.map(({item}) => item);
+  const workflows = state.data.workflows.filter((item) => intent ? intent.workflowIds.includes(item.id) : matches(`${item.title} ${item.input} ${item.steps} ${item.gate} ${item.human}`));
+  qs('#global-search-summary').textContent = `${tools.length + workflows.length} نتيجة: ${workflows.length} مسار و${tools.length} أداة. ${tools.length > 30 ? 'نعرض أول 30 أداة؛ ضيّق المجال لرؤية البقية.' : ''}`;
   if (!tools.length && !workflows.length) {
     target.innerHTML = emptyState('لم أجد نتيجة مطابقة', 'استخدم كلمة أقصر مثل: فيديو، صوت، بحث، ترجمة أو عرض.');
     return;
   }
-  target.innerHTML = `${workflows.length ? `<section class="result-group"><h3>مسارات العمل (${workflows.length})</h3><div class="cards-grid">${workflows.slice(0, 12).map(workflowCard).join('')}</div></section>` : ''}${tools.length ? `<section class="result-group"><h3>الأدوات والنماذج (${tools.length})</h3><div class="cards-grid tools">${tools.slice(0, 24).map(toolCard).join('')}</div></section>` : ''}`;
+  target.innerHTML = `${intent ? `<div class="intent-answer"><strong>${esc(intent.title)}</strong><p>${esc(intent.lead)}</p><small>${esc(state.guide.rankingPolicy)}</small></div>` : ''}${workflows.length ? `<section class="result-group"><h3>ابدأ بمسار العمل (${workflows.length})</h3><div class="cards-grid">${workflows.slice(0, 12).map(workflowCard).join('')}</div></section>` : ''}${tools.length ? `<section class="result-group"><h3>أدوات مناسبة (${tools.length})</h3><div class="cards-grid tools">${tools.slice(0, 30).map(toolCard).join('')}</div></section>` : ''}`;
 }
 
 function renderVideo() {
@@ -279,9 +298,10 @@ function openWorkflow(id) {
 function openTool(id) {
   const item = state.data.tools.find((entry) => entry.id === Number(id));
   if (!item) return;
+  const price = state.guide?.pricing[item.name];
   qs('#dialog-kicker').textContent = item.categoryLabel;
   qs('#dialog-title').textContent = item.name;
-  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>تعريف الأداة ومجالها</span><b>${esc(item.name)}: ${esc(item.kind)} · ${esc(item.categoryLabel)}</b></div><div class="dialog-row"><span>ماذا تفعل وما فائدتها؟</span><b>${esc(item.note)}</b></div><div class="dialog-row"><span>طريقة الوصول</span><b>${esc(item.access)}</b></div><div class="dialog-row"><span>التقييم وحالة التحقق</span><b>${esc(item.evidence)} — ${esc(item.status)}</b></div><div class="dialog-row"><span>قبل الاستخدام</span><b>هذا وصف في الدليل وليس تشغيلًا مدمجًا. افتح صفحة الأداة، ثم اختبر فائدتها على عينة حقيقية ووثّق الجودة والتكلفة والقيود.</b></div>`;
+  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>تعريف الأداة ومجالها</span><b>${esc(item.name)}: ${esc(item.kind)} · ${esc(item.categoryLabel)}</b></div><div class="dialog-row"><span>ماذا تفعل وما فائدتها؟</span><b>${esc(item.note)}</b></div><div class="dialog-row"><span>طريقة الوصول</span><b>${esc(item.access)}</b></div><div class="dialog-row"><span>السعر والخطة المجانية</span><b>${esc(price ? `${price.tier}: ${price.detail}` : 'لم يتحقق مِرْشاد من السعر الحالي؛ راجع الموقع الرسمي قبل أي قرار.')}</b>${price ? `<a href="${esc(price.source)}" target="_blank" rel="noopener">مصدر السعر الرسمي ↗</a>` : ''}</div><div class="dialog-row"><span>التقييم وحالة التحقق</span><b>${esc(item.evidence)} — ${esc(item.status)}. هذه درجة تحقق المعلومات وليست تقييم جودة.</b></div><div class="dialog-row"><span>الجودة العملية</span><b>${esc(price?.quality || 'لم يُنفذ اختبار جودة مقارن موثق بعد.')}</b></div><div class="dialog-row"><span>قبل الاستخدام</span><b>هذا وصف في الدليل وليس تشغيلًا مدمجًا. اختبر الأداة على عينة حقيقية ووثّق الجودة والتكلفة والقيود.</b></div>`;
   qs('#dialog-actions').innerHTML = `${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">زيارة صفحة الأداة ↗</a>` : ''}<button class="favorite-button ${isFavorite('tools', item.id) ? 'saved' : ''}" data-favorite-type="tools" data-favorite-id="${item.id}" type="button">${isFavorite('tools', item.id) ? '♥ محفوظ' : '♡ حفظ'}</button>`;
   qs('#detail-dialog').showModal();
 }
@@ -319,6 +339,8 @@ function bindEvents() {
       setView('search');
       searchAll();
     }
+    const intentButton = event.target.closest('[data-intent]');
+    if (intentButton) { qs('#global-search-input').value = intentButton.dataset.intent; searchAll(); }
     if (event.target.closest('[data-copy-prompt]')) copyPrompt();
   });
 
@@ -335,6 +357,7 @@ function bindEvents() {
   });
   qs('#global-search-input').addEventListener('input', searchAll);
   qs('#global-search-form').addEventListener('submit', (event) => { event.preventDefault(); searchAll(); });
+  ['#search-category','#search-pricing','#search-evidence','#search-sort'].forEach((selector) => qs(selector).addEventListener('change',searchAll));
   qs('#global-search-clear').addEventListener('click', () => { qs('#global-search-input').value = ''; searchAll(); qs('#global-search-input').focus(); });
   qs('#workflow-search').addEventListener('input', renderWorkflows);
   qs('#workflow-risk').addEventListener('change', renderWorkflows);
@@ -383,15 +406,18 @@ function bindEvents() {
 
 async function init() {
   try {
-    const [dataResponse, radarResponse] = await Promise.all([fetch('./data.json'), fetch('./radar.json')]);
-    if (!dataResponse.ok || !radarResponse.ok) throw new Error('تعذر تحميل البيانات');
+    const [dataResponse, radarResponse, guideResponse] = await Promise.all([fetch('./data.json'), fetch('./radar.json'), fetch('./guide.json')]);
+    if (!dataResponse.ok || !radarResponse.ok || !guideResponse.ok) throw new Error('تعذر تحميل البيانات');
     state.data = await dataResponse.json();
     state.radar = await radarResponse.json();
+    state.guide = await guideResponse.json();
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     qs('#ios-install-button').hidden = !(isIos && !isStandalone);
     const categorySelect = qs('#tool-category');
     Object.entries(state.data.categories).forEach(([value, label]) => categorySelect.insertAdjacentHTML('beforeend', `<option value="${esc(value)}">${esc(label)}</option>`));
+    Object.entries(state.data.categories).forEach(([value, label]) => qs('#search-category').insertAdjacentHTML('beforeend', `<option value="${esc(value)}">${esc(label)}</option>`));
+    qs('#intent-shortcuts').innerHTML = state.guide.intents.map((item) => `<button type="button" data-intent="${esc(item.title)}">${esc(item.title)}</button>`).join('');
     const radarCategory = qs('#radar-category');
     [...new Set(state.radar.updates.map((item) => item.category))].sort().forEach((label) => radarCategory.insertAdjacentHTML('beforeend', `<option value="${esc(label)}">${esc(label)}</option>`));
     bindEvents();

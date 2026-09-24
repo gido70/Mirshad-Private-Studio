@@ -159,14 +159,23 @@
       </section>
 
       <section class="view" id="view-search" data-title="البحث الشامل">
-        <div class="page-intro"><div><span class="section-kicker">نتيجة واحدة من كل الاستوديو</span><h2>ابحث في الأدوات والمسارات</h2></div></div>
+        <div class="page-intro"><div><span class="section-kicker">بوصلة مِرْشاد</span><h2>ماذا تريد أن تفعل؟</h2><p>اكتب حاجتك بلغة عادية أو اختر مهمة. نعرض المسار والأدوات ذات الصلة مع توضيح الأسعار المتحقق منها وحدود التقييم.</p></div></div>
+        <div id="intent-shortcuts" class="intent-shortcuts" aria-label="مهام سريعة"></div>
         <form class="search-panel" id="global-search-form" role="search">
           <input id="global-search-input" type="search" aria-label="عبارة البحث" placeholder="اكتب اسم أداة، مهمة، مخرجًا أو كلمة عربية…" autocomplete="off">
           <button class="search-submit" type="submit">بحث</button>
           <button id="global-search-clear" type="button">مسح</button>
         </form>
+        <div class="search-refine" aria-label="تصفية نتائج البحث">
+          <select id="search-category" aria-label="مجال الأدوات"><option value="all">كل المجالات</option></select>
+          <select id="search-pricing" aria-label="حالة السعر"><option value="all">كل الأسعار</option><option value="free">مجانية موثقة أو بخطة مجانية</option><option value="unknown">سعر غير موثق هنا</option></select>
+          <select id="search-evidence" aria-label="درجة التحقق"><option value="all">كل درجات التحقق</option><option value="A">A — متحقق</option><option value="B">B — جزئي</option><option value="C">C — يحتاج اختبارًا</option></select>
+          <select id="search-sort" aria-label="ترتيب النتائج"><option value="relevant">الأقرب للمهمة</option><option value="name">حسب الاسم</option></select>
+        </div>
         <p class="result-summary" id="global-search-summary">اكتب كلمة للبحث في الاستوديو.</p>
         <div id="global-results"></div>
+        <p class="search-caveat">الترتيب يدل على ملاءمة المهمة واكتمال المعلومات، ولا يقيس جودة المخرجات. تفاصيل الخطط تتغير؛ افتح المصدر الرسمي قبل قرار الشراء.</p>
+        <a class="text-button" href="./study.html">فتح الدراسة الحية وفهرس المصادر ←</a>
       </section>
 
       <section class="view" id="view-workflows" data-title="مسارات العمل">
