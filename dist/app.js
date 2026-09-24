@@ -2,6 +2,7 @@ const state = {
   data: null,
   radar: null,
   guide: null,
+  index: null,
   view: 'radar',
   favorites: JSON.parse(localStorage.getItem('mirshad:favorites') || '{"tools":[],"workflows":[]}'),
   videoDone: JSON.parse(localStorage.getItem('mirshad:video-progress') || '[]'),
@@ -241,12 +242,18 @@ function searchAll() {
   scored.sort((a,b) => sort === 'name' ? a.item.name.localeCompare(b.item.name,'ar') : b.score - a.score || a.item.name.localeCompare(b.item.name,'ar'));
   const tools = scored.map(({item}) => item);
   const workflows = state.data.workflows.filter((item) => intent ? intent.workflowIds.includes(item.id) : matches(`${item.title} ${item.input} ${item.steps} ${item.gate} ${item.human}`));
-  qs('#global-search-summary').textContent = `${tools.length + workflows.length} نتيجة: ${workflows.length} مسار و${tools.length} أداة. ${tools.length > 30 ? 'نعرض أول 30 أداة؛ ضيّق المجال لرؤية البقية.' : ''}`;
-  if (!tools.length && !workflows.length) {
+  const sections = state.index.sections.map((section) => {
+    const title = normalizeArabic(section.title);
+    const body = normalizeArabic(section.text);
+    const score = title.includes(query) ? 100 : terms.reduce((total, term) => total + (title.includes(term) ? 12 : body.includes(term) ? 1 : 0), 0);
+    return { section, score };
+  }).filter(({score}) => score > 0).sort((a,b) => b.score - a.score);
+  qs('#global-search-summary').textContent = `${tools.length + workflows.length + sections.length} نتيجة في المصادر الأربعة: ${sections.length} قسمًا من الإندكس، ${workflows.length} مسارًا و${tools.length} أداة. ${tools.length > 30 ? 'نعرض أول 30 أداة؛ ضيّق المجال لرؤية البقية.' : ''}`;
+  if (!tools.length && !workflows.length && !sections.length) {
     target.innerHTML = emptyState('لم أجد نتيجة مطابقة', 'استخدم كلمة أقصر مثل: فيديو، صوت، بحث، ترجمة أو عرض.');
     return;
   }
-  target.innerHTML = `${intent ? `<div class="intent-answer"><strong>${esc(intent.title)}</strong><p>${esc(intent.lead)}</p><small>${esc(state.guide.rankingPolicy)}</small>${intent.id === 'video' ? '<div><button class="primary-action" type="button" data-open-view="video">افتح مختبر الفيديو وابدأ التجربة ←</button></div>' : ''}</div>` : ''}${workflows.length ? `<section class="result-group"><h3>ابدأ بمسار العمل (${workflows.length})</h3><div class="cards-grid">${workflows.slice(0, 12).map(workflowCard).join('')}</div></section>` : ''}${tools.length ? `<section class="result-group"><h3>أدوات مناسبة (${tools.length})</h3><div class="cards-grid tools">${tools.slice(0, 30).map(toolCard).join('')}</div></section>` : ''}`;
+  target.innerHTML = `${intent ? `<div class="intent-answer"><strong>إجابة مِرْشاد: ${esc(intent.title)}</strong><p>${esc(intent.lead)}</p><small>المصدر: دليل المهام guide.json · ${esc(state.guide.rankingPolicy)}</small><div><button class="secondary-action" type="button" data-intent-prompt="${esc(intent.id)}">برومبت المهمة الجاهز ←</button></div>${intent.id === 'video' ? '<div><button class="primary-action" type="button" data-open-view="video">افتح مختبر الفيديو وابدأ التجربة ←</button></div>' : ''}</div>` : ''}${sections.length ? `<section class="result-group"><h3>من الإندكس الأصلي (${sections.length})</h3><p class="search-caveat">المادة المرجعية V1.4 مؤرشفة؛ بيانات الأدوات الحالية في السجل الحي أدناه.</p><div class="index-results">${sections.slice(0, 6).map(({section}) => `<article class="index-result"><small>المصدر: ${esc(state.index.source)}</small><h4>${esc(section.title)}</h4><p>${esc(section.text.slice(0, 270))}${section.text.length > 270 ? '…' : ''}</p><a href="${esc(state.index.path)}#${encodeURIComponent(section.id)}" target="_blank" rel="noopener">اقرأ القسم في الإندكس ←</a></article>`).join('')}</div>${sections.length > 6 ? '<p class="search-caveat">تظهر أول ستة أقسام؛ استخدم عبارة أكثر تحديدًا لتضييق النتائج.</p>' : ''}</section>` : ''}${workflows.length ? `<section class="result-group"><h3>ابدأ بمسار العمل (${workflows.length})</h3><small>المصدر: سجل المسارات الحي data.json</small><div class="cards-grid">${workflows.slice(0, 12).map(workflowCard).join('')}</div></section>` : ''}${tools.length ? `<section class="result-group"><h3>أدوات مناسبة (${tools.length})</h3><small>المصدر: سجل الأدوات الحي data.json؛ الأسعار الموثقة من guide.json</small><div class="cards-grid tools">${tools.slice(0, 30).map(toolCard).join('')}</div></section>` : ''}`;
 }
 
 function renderVideo() {
@@ -374,6 +381,12 @@ function bindEvents() {
     setView('search');
     searchAll();
   });
+  qs('#start-search-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    qs('#global-search-input').value = qs('#start-search-input').value;
+    setView('search');
+    searchAll();
+  });
   qs('#global-search-input').addEventListener('input', searchAll);
   qs('#global-search-form').addEventListener('submit', (event) => { event.preventDefault(); searchAll(); });
   ['#search-category','#search-pricing','#search-evidence','#search-sort'].forEach((selector) => qs(selector).addEventListener('change',searchAll));
@@ -425,11 +438,12 @@ function bindEvents() {
 
 async function init() {
   try {
-    const [dataResponse, radarResponse, guideResponse] = await Promise.all([fetch('./data.json'), fetch('./radar.json'), fetch('./guide.json')]);
-    if (!dataResponse.ok || !radarResponse.ok || !guideResponse.ok) throw new Error('تعذر تحميل البيانات');
+    const [dataResponse, radarResponse, guideResponse, indexResponse] = await Promise.all([fetch('./data.json'), fetch('./radar.json'), fetch('./guide.json'), fetch('./index-sections.json')]);
+    if (!dataResponse.ok || !radarResponse.ok || !guideResponse.ok || !indexResponse.ok) throw new Error('تعذر تحميل البيانات');
     state.data = await dataResponse.json();
     state.radar = await radarResponse.json();
     state.guide = await guideResponse.json();
+    state.index = await indexResponse.json();
     const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
     qs('#ios-install-button').hidden = !(isIos && !isStandalone);

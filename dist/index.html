@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icons/mirshad.svg">
-  <link rel="stylesheet" href="./styles.css?v=map1">
+  <link rel="stylesheet" href="./styles.css?v=index1">
 </head>
 <body>
   <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
@@ -29,13 +29,13 @@
 
       <nav class="side-nav">
         <button class="nav-item active" data-view="radar" type="button"><span>◉</span><b>رادار المستجدات</b><i class="nav-badge" id="radar-nav-badge" hidden>0</i></button>
-        <button class="nav-item" data-view="home" type="button"><span>⌂</span><b>الاستوديو</b></button>
-        <button class="nav-item" data-view="map" type="button"><span>◇</span><b>خريطة الاستخدام والبرومبتات</b></button>
-        <button class="nav-item" data-view="search" type="button"><span>⌕</span><b>البحث الشامل</b></button>
+        <button class="nav-item" data-view="search" type="button"><span>⌕</span><b>ابدأ وابحث</b></button>
+        <button class="nav-item" data-view="map" type="button"><span>◇</span><b>الخريطة والبرومبتات</b></button>
         <button class="nav-item" data-view="workflows" type="button"><span>↝</span><b>مسارات العمل</b></button>
         <button class="nav-item" data-view="tools" type="button"><span>◫</span><b>دليل الأدوات</b></button>
         <button class="nav-item" data-view="video" type="button"><span>▶</span><b>مختبر الفيديو</b></button>
         <button class="nav-item" data-view="favorites" type="button"><span>♡</span><b>المحفوظات</b></button>
+        <details class="nav-more"><summary>مراجع إضافية</summary><button class="nav-item" data-view="home" type="button"><span>⌂</span><b>عن الاستوديو</b></button><a href="./study.html">الدراسة الحية ←</a></details>
       </nav>
 
       <div class="sidebar-note">
@@ -60,6 +60,11 @@
       <nav class="journey-nav" aria-label="مسار التنقل"><button id="journey-back" type="button">رجوع</button><div id="journey-trail" class="journey-trail"></div><button id="journey-home" type="button">الرئيسية</button></nav>
 
       <section class="view active" id="view-radar" data-title="رادار مِرْشاد الأسبوعي">
+        <div class="start-here" aria-label="ابدأ في مِرْشاد">
+          <div><span class="section-kicker">نقطة البداية</span><h2>ماذا تريد أن تنجز؟</h2><p>اكتب سؤالك؛ يعرض مِرْشاد ما يجده في الإندكس والدراسة وسجل الأدوات، ثم يقترح المسار والبرومبت.</p></div>
+          <form id="start-search-form" role="search"><label class="sr-only" for="start-search-input">بحث في إندكس مِرْشاد</label><input id="start-search-input" type="search" placeholder="مثلاً: أريد إنتاج فيديو عربي أو بحث موثق" autocomplete="off"><button class="search-submit" type="submit">بحث في الإندكس</button></form>
+          <div class="quick-chips"><button type="button" data-quick-search="فيديو">إنتاج فيديو</button><button type="button" data-quick-search="بحث موثق">بحث موثق</button><button type="button" data-quick-search="صوت عربي">صوت عربي</button><button type="button" data-open-view="map">كيف أستخدم مِرْشاد؟</button></div>
+        </div>
         <div class="radar-hero">
           <div class="radar-hero-copy">
             <span class="radar-live"><i></i> رصد موثّق للمستجدات</span>
@@ -168,12 +173,12 @@
           <button class="search-submit" type="submit">بحث</button>
           <button id="global-search-clear" type="button">مسح</button>
         </form>
-        <div class="search-refine" aria-label="تصفية نتائج البحث">
+        <details class="advanced-search"><summary>بحث متقدم: المجال، السعر، التحقق والترتيب</summary><div class="search-refine" aria-label="تصفية نتائج البحث">
           <select id="search-category" aria-label="مجال الأدوات"><option value="all">كل المجالات</option></select>
           <select id="search-pricing" aria-label="حالة السعر"><option value="all">كل الأسعار</option><option value="free">مجانية موثقة أو بخطة مجانية</option><option value="unknown">سعر غير موثق هنا</option></select>
           <select id="search-evidence" aria-label="درجة التحقق"><option value="all">كل درجات التحقق</option><option value="A">A — متحقق</option><option value="B">B — جزئي</option><option value="C">C — يحتاج اختبارًا</option></select>
           <select id="search-sort" aria-label="ترتيب النتائج"><option value="relevant">الأقرب للمهمة</option><option value="name">حسب الاسم</option></select>
-        </div>
+        </div></details>
         <p class="result-summary" id="global-search-summary">اكتب كلمة للبحث في الاستوديو.</p>
         <div id="global-results"></div>
         <p class="search-caveat">الترتيب يدل على ملاءمة المهمة واكتمال المعلومات، ولا يقيس جودة المخرجات. تفاصيل الخطط تتغير؛ افتح المصدر الرسمي قبل قرار الشراء.</p>
@@ -247,7 +252,7 @@
 
   <nav class="mobile-nav" aria-label="التنقل على الهاتف">
     <button class="active" data-view="radar" type="button"><span>◉</span><b>الرادار</b></button>
-    <button data-view="home" type="button"><span>⌂</span><b>الاستوديو</b></button>
+    <button data-view="map" type="button"><span>◇</span><b>الخريطة</b></button>
     <button data-view="search" type="button"><span>⌕</span><b>بحث</b></button>
     <button data-view="tools" type="button"><span>◫</span><b>الأدوات</b></button>
     <button data-view="video" type="button"><span>▶</span><b>الفيديو</b></button>
@@ -260,6 +265,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=map1" defer></script>
+  <script src="./app.js?v=index1" defer></script>
 </body>
 </html>
