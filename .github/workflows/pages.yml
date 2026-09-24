@@ -24,7 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Verify catalog and live guide
-        run: node scripts/verify.mjs
+        run: |
+          python3 scripts/build-index.py --check
+          node scripts/verify.mjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
