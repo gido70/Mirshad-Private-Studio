@@ -4,7 +4,7 @@ import vm from 'node:vm';
 const root = new URL('../dist/', import.meta.url);
 const read = (name) => fs.readFileSync(new URL(name, root), 'utf8');
 
-const required = ['index.html', 'styles.css', 'app.js', 'data.json', 'radar.json', 'guide.json', 'study.html', 'manifest.webmanifest', 'service-worker.js', 'icons/mirshad.svg', 'archive/Mirshad-AI-Guide-Master-V1.4.html'];
+const required = ['index.html', 'styles.css', 'app.js', 'data.json', 'radar.json', 'guide.json', 'index-sections.json', 'study.html', 'manifest.webmanifest', 'service-worker.js', 'icons/mirshad.svg', 'archive/Mirshad-AI-Guide-Master-V1.4.html'];
 for (const file of required) {
   if (!fs.existsSync(new URL(file, root))) throw new Error(`Missing file: ${file}`);
 }
@@ -12,6 +12,14 @@ for (const file of required) {
 const data = JSON.parse(read('data.json'));
 const radar = JSON.parse(read('radar.json'));
 const guide = JSON.parse(read('guide.json'));
+const index = JSON.parse(read('index-sections.json'));
+if (index.sections.length < 20) throw new Error('Original index sections missing');
+const archive = read('archive/Mirshad-AI-Guide-Master-V1.4.html');
+for (const section of index.sections) {
+  if (!/^[a-z0-9-]+$/.test(section.id) || !archive.includes(`id="${section.id}"`)) throw new Error(`Broken index anchor: ${section.id}`);
+  if (!section.title || !section.text) throw new Error(`Empty index section: ${section.id}`);
+}
+if (new Set(index.sections.map(section => section.id)).size !== index.sections.length) throw new Error('Duplicate index sections');
 if (Object.keys(data.categories).length !== 21) throw new Error('Expected 21 categories');
 if (data.tools.length !== 391) throw new Error('Expected 391 tools');
 if (data.workflows.length !== 24) throw new Error('Expected 24 workflows');
@@ -43,7 +51,8 @@ for (const id of ['main', 'view-radar', 'view-home', 'view-map', 'view-search', 
 }
 if (!html.includes('lang="ar" dir="rtl"')) throw new Error('Arabic RTL document settings missing');
 if (!read('study.html').includes('lang="ar" dir="rtl"')) throw new Error('Arabic RTL study missing');
-for (const id of ['search-category', 'search-pricing', 'search-evidence', 'search-sort', 'intent-shortcuts']) if (!html.includes(`id="${id}"`)) throw new Error(`Missing search control: ${id}`);
+for (const id of ['start-search-form', 'start-search-input', 'search-category', 'search-pricing', 'search-evidence', 'search-sort', 'intent-shortcuts']) if (!html.includes(`id="${id}"`)) throw new Error(`Missing search control: ${id}`);
+if (!read('study.html').includes('index-sections.json')) throw new Error('Study does not read the shared index');
 
 const app = read('app.js');
 new vm.Script(app, { filename: 'app.js' });
