@@ -1,4 +1,4 @@
-const CACHE = 'mirshad-private-v2-radar';
+const CACHE = 'mirshad-private-v3-catalog';
 const CORE = ['./', './index.html', './styles.css', './app.js', './data.json', './radar.json', './manifest.webmanifest', './icons/mirshad.svg'];
 
 self.addEventListener('install', (event) => {
