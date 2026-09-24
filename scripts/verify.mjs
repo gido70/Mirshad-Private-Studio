@@ -12,7 +12,7 @@ for (const file of required) {
 const data = JSON.parse(read('data.json'));
 const radar = JSON.parse(read('radar.json'));
 if (Object.keys(data.categories).length !== 21) throw new Error('Expected 21 categories');
-if (data.tools.length !== 388) throw new Error('Expected 388 tools');
+if (data.tools.length !== 391) throw new Error('Expected 391 tools');
 if (data.workflows.length !== 24) throw new Error('Expected 24 workflows');
 if (new Set(data.tools.map((item) => item.id)).size !== data.tools.length) throw new Error('Duplicate tool IDs');
 if (new Set(data.tools.map((item) => item.name.toLowerCase())).size !== data.tools.length) throw new Error('Duplicate tool names');
@@ -36,4 +36,4 @@ const app = read('app.js');
 new vm.Script(app, { filename: 'app.js' });
 JSON.parse(read('manifest.webmanifest'));
 
-console.log(JSON.stringify({ ok: true, categories: 21, tools: 388, workflows: 24, radarUpdates: radar.updates.length, rtl: true, pwa: true }));
+console.log(JSON.stringify({ ok: true, categories: 21, tools: 391, workflows: 24, radarUpdates: radar.updates.length, rtl: true, pwa: true }));
