@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b3045">
+  <meta name="description" content="استوديو مِرْشاد الخاص — مختبر شخصي للتعلم والتجربة وبناء أقصر المسارات الموثقة إلى نتائج الذكاء الاصطناعي.">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <title>استوديو مِرْشاد الخاص</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/svg+xml" href="./icons/mirshad.svg">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="التنقل الرئيسي">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true"><span>م</span></div>
+        <div>
+          <strong>مِرْشاد</strong>
+          <small>مختبرك الخاص</small>
+        </div>
+      </div>
+
+      <nav class="side-nav">
+        <button class="nav-item active" data-view="home" type="button"><span>⌂</span><b>الرئيسية</b></button>
+        <button class="nav-item" data-view="search" type="button"><span>⌕</span><b>البحث الشامل</b></button>
+        <button class="nav-item" data-view="workflows" type="button"><span>↝</span><b>مسارات العمل</b></button>
+        <button class="nav-item" data-view="tools" type="button"><span>◫</span><b>دليل الأدوات</b></button>
+        <button class="nav-item" data-view="video" type="button"><span>▶</span><b>مختبر الفيديو</b></button>
+        <button class="nav-item" data-view="favorites" type="button"><span>♡</span><b>المحفوظات</b></button>
+      </nav>
+
+      <div class="sidebar-note">
+        <span class="lock-dot"></span>
+        <div><strong>مساحة خاصة</strong><small>لا نشر تلقائي للمحتوى</small></div>
+      </div>
+    </aside>
+
+    <main id="main" class="main-stage">
+      <header class="topbar">
+        <button class="icon-button menu-button" id="menu-button" type="button" aria-label="فتح القائمة" aria-expanded="false">☰</button>
+        <div class="topbar-title">
+          <span class="eyebrow">استوديو مِرْشاد للمحتوى الذكي</span>
+          <h1 id="page-title">ماذا تريد أن تنجز اليوم؟</h1>
+        </div>
+        <div class="topbar-actions">
+          <span class="version-pill">V1.0</span>
+          <button class="install-button" id="install-button" type="button" hidden>تثبيت على الهاتف</button>
+          <button class="install-button" id="ios-install-button" type="button" hidden>إضافة للآيفون</button>
+        </div>
+      </header>
+
+      <section class="view active" id="view-home" data-title="ماذا تريد أن تنجز اليوم؟">
+        <div class="command-card">
+          <div class="command-copy">
+            <span class="section-kicker">ابدأ من حاجتك، لا من الأداة</span>
+            <h2>ابحث عن المهمة، وسيرشدك مِرْشاد إلى الطريق المناسب</h2>
+            <p>فيديو، عرض، بحث، صوت، صورة، مستند أو أتمتة — اكتب ما تريد إنجازه.</p>
+          </div>
+          <form class="hero-search" id="hero-search-form" role="search">
+            <label class="sr-only" for="hero-search-input">ابحث في الاستوديو</label>
+            <input id="hero-search-input" type="search" autocomplete="off" placeholder="مثال: أريد إنشاء فيديو عربي قصير…">
+            <button type="submit">ابحث الآن</button>
+          </form>
+          <div class="quick-chips" aria-label="عمليات بحث سريعة">
+            <button type="button" data-quick-search="فيديو">فيديو</button>
+            <button type="button" data-quick-search="صوت عربي">صوت عربي</button>
+            <button type="button" data-quick-search="عرض تقديمي">عرض تقديمي</button>
+            <button type="button" data-quick-search="بحث موثق">بحث موثق</button>
+          </div>
+        </div>
+
+        <div class="metric-grid" aria-label="ملخص المحتوى">
+          <article class="metric-card"><span>المجالات</span><strong id="metric-categories">—</strong><small>مجالًا وظيفيًا</small></article>
+          <article class="metric-card"><span>الأدوات والنماذج</span><strong id="metric-tools">—</strong><small>مدخلًا منظمًا</small></article>
+          <article class="metric-card"><span>مسارات العمل</span><strong id="metric-workflows">—</strong><small>طريقًا قابلًا للتطبيق</small></article>
+          <article class="metric-card accent"><span>التجربة الأولى</span><strong>فيديو</strong><small>قيد البناء والتوثيق</small></article>
+        </div>
+
+        <div class="home-grid">
+          <article class="video-focus-card">
+            <div class="focus-badge">التجربة الأولى</div>
+            <div class="video-icon" aria-hidden="true">▶</div>
+            <div>
+              <h3>مختبر إنتاج الفيديو العربي</h3>
+              <p>من الفكرة والنص، إلى الصوت والصورة والمونتاج والترجمة والتصدير. تجربة واحدة تختبر معظم مكونات الاستوديو.</p>
+              <div class="progress-row"><div class="progress-track"><span id="home-video-progress"></span></div><b id="home-video-progress-label">0%</b></div>
+              <button class="primary-action" type="button" data-open-view="video">ابدأ التجربة</button>
+            </div>
+          </article>
+
+          <article class="purpose-card">
+            <span class="section-kicker">المقصد الأول</span>
+            <h3>أتعلم، أبني، أجرّب، ثم أنقل الطريق</h3>
+            <ol>
+              <li><span>1</span><div><b>حاجتي</b><small>أحدد النتيجة التي أريدها.</small></div></li>
+              <li><span>2</span><div><b>أتعلم بالبناء</b><small>أجرب الأدوات على مشروع حقيقي.</small></div></li>
+              <li><span>3</span><div><b>أثبت الطريق</b><small>أقيس الجودة والزمن والتكلفة.</small></div></li>
+              <li><span>4</span><div><b>أنقل الخبرة</b><small>أحول الناجح إلى وصفة واضحة.</small></div></li>
+            </ol>
+          </article>
+        </div>
+
+        <section class="recent-section">
+          <div class="section-heading"><div><span class="section-kicker">طرق جاهزة للبدء</span><h2>مسارات مقترحة</h2></div><button class="text-button" data-open-view="workflows" type="button">عرض كل المسارات ←</button></div>
+          <div class="cards-grid compact" id="featured-workflows"></div>
+        </section>
+      </section>
+
+      <section class="view" id="view-search" data-title="البحث الشامل">
+        <div class="page-intro"><div><span class="section-kicker">نتيجة واحدة من كل الاستوديو</span><h2>ابحث في الأدوات والمسارات</h2></div></div>
+        <div class="search-panel">
+          <input id="global-search-input" type="search" placeholder="اكتب اسم أداة، مهمة، مخرجًا أو كلمة عربية…" autocomplete="off">
+          <button id="global-search-clear" type="button">مسح</button>
+        </div>
+        <p class="result-summary" id="global-search-summary">اكتب كلمة للبحث في الاستوديو.</p>
+        <div id="global-results"></div>
+      </section>
+
+      <section class="view" id="view-workflows" data-title="مسارات العمل">
+        <div class="page-intro"><div><span class="section-kicker">ابدأ بالطريق قبل اختيار الأداة</span><h2>مكتبة المسارات</h2><p>لكل مسار مدخلات واضحة، خطوات تنفيذ، بوابة جودة وقرار بشري لا يُفوض.</p></div></div>
+        <div class="filter-bar">
+          <input id="workflow-search" type="search" placeholder="ابحث: فيديو، بحث، بودكاست، عرض…">
+          <select id="workflow-risk" aria-label="مستوى المخاطر"><option value="all">كل مستويات المخاطر</option><option value="منخفض">منخفض</option><option value="متوسط">متوسط</option><option value="مرتفع">مرتفع</option></select>
+        </div>
+        <p class="result-summary" id="workflow-count"></p>
+        <div class="cards-grid" id="workflow-list"></div>
+      </section>
+
+      <section class="view" id="view-tools" data-title="دليل الأدوات">
+        <div class="page-intro"><div><span class="section-kicker">سجل معرفي منظم</span><h2>الأدوات والنماذج</h2><p>وجود الأداة في السجل لا يعني أنها مختبرة. اقرأ درجة الثقة والحالة قبل اعتمادها.</p></div></div>
+        <div class="filter-bar tool-filters">
+          <input id="tool-search" type="search" placeholder="ابحث باسم الأداة أو وظيفتها…">
+          <select id="tool-category" aria-label="المجال"><option value="all">كل المجالات</option></select>
+          <select id="tool-evidence" aria-label="درجة الثقة"><option value="all">كل درجات الثقة</option><option value="A">A — متحقق</option><option value="B">B — رسمي جزئيًا</option><option value="C">C — يحتاج اختبارًا</option><option value="H">H — حجر تحقق</option></select>
+        </div>
+        <div class="list-toolbar"><p class="result-summary" id="tool-count"></p><button class="text-button" id="reset-tools" type="button">إعادة الضبط</button></div>
+        <div class="cards-grid tools" id="tool-list"></div>
+        <button class="load-more" id="load-more-tools" type="button" hidden>عرض المزيد</button>
+      </section>
+
+      <section class="view" id="view-video" data-title="مختبر الفيديو">
+        <div class="page-intro video-intro">
+          <div><span class="section-kicker">التجربة العملية رقم 1</span><h2>وصفة مِرْشاد لإنتاج فيديو عربي</h2><p>نبدأ بعينة قصيرة من 60–90 ثانية، ونوثق كل قرار قبل الانتقال إلى إنتاج أكبر.</p></div>
+          <div class="lab-progress"><strong id="video-progress-label">0%</strong><span>نسبة إنجاز التجربة</span><div class="progress-track"><i id="video-progress"></i></div></div>
+        </div>
+        <div class="video-brief">
+          <div><span>النطاق المقترح</span><b>فيديو عربي قصير</b><small>60–90 ثانية · عمودي أو أفقي · عينة واحدة</small></div>
+          <button class="secondary-action" id="reset-video" type="button">تصفير التجربة</button>
+        </div>
+        <div class="lab-steps" id="video-steps"></div>
+        <article class="recipe-card">
+          <div><span class="section-kicker">بوابة الاعتماد النهائية</span><h3>لا نعتمد الوصفة حتى تجتاز هذه النقاط</h3></div>
+          <ul><li>المعلومة صحيحة ومصدرها محفوظ.</li><li>النطق العربي والأسماء والأرقام سليمة.</li><li>الصور والموسيقى والصوت مرخصة أو مملوكة.</li><li>الفيديو مقروء على الهاتف مع ترجمة واضحة.</li><li>الزمن والتكلفة والأخطاء موثقة بصدق.</li></ul>
+        </article>
+      </section>
+
+      <section class="view" id="view-favorites" data-title="المحفوظات">
+        <div class="page-intro"><div><span class="section-kicker">قائمتك السريعة</span><h2>المحفوظات</h2><p>الأدوات والمسارات التي تريد الرجوع إليها. تُحفظ على هذا الجهاز في النسخة الحالية.</p></div></div>
+        <div id="favorites-content"></div>
+      </section>
+
+      <footer class="app-footer">
+        <div><strong>استوديو مِرْشاد الخاص</strong><span>نسخة التطبيق الأولى · المصدر المرجعي V1.4</span></div>
+        <a href="./archive/Mirshad-AI-Guide-Master-V1.4.html" target="_blank" rel="noopener">فتح الإندكس الأصلي المحفوظ</a>
+      </footer>
+    </main>
+  </div>
+
+  <nav class="mobile-nav" aria-label="التنقل على الهاتف">
+    <button class="active" data-view="home" type="button"><span>⌂</span><b>الرئيسية</b></button>
+    <button data-view="search" type="button"><span>⌕</span><b>بحث</b></button>
+    <button data-view="workflows" type="button"><span>↝</span><b>المسارات</b></button>
+    <button data-view="tools" type="button"><span>◫</span><b>الأدوات</b></button>
+    <button data-view="video" type="button"><span>▶</span><b>الفيديو</b></button>
+  </nav>
+
+  <dialog id="detail-dialog">
+    <div class="dialog-head"><div><span class="section-kicker" id="dialog-kicker"></span><h2 id="dialog-title"></h2></div><button id="dialog-close" type="button" aria-label="إغلاق">×</button></div>
+    <div class="dialog-body" id="dialog-body"></div>
+    <div class="dialog-actions" id="dialog-actions"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js" defer></script>
+</body>
+</html>

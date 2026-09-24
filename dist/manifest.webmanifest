@@ -1,0 +1,15 @@
+{
+  "name": "استوديو مِرْشاد الخاص",
+  "short_name": "مِرْشاد",
+  "description": "مختبر شخصي للتعلم والتجربة وبناء المسارات الموثقة للذكاء الاصطناعي.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./#home",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f3f8fa",
+  "theme_color": "#0b3045",
+  "icons": [
+    { "src": "./icons/mirshad.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
