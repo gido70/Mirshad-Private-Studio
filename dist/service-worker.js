@@ -1,4 +1,4 @@
-const CACHE = 'mirshad-private-v7-index';
+const CACHE = 'mirshad-private-v8-video-guide';
 const CORE = ['./', './index.html', './styles.css', './app.js', './data.json', './radar.json', './guide.json', './index-sections.json', './study.html', './manifest.webmanifest', './icons/mirshad.svg'];
 self.addEventListener('install', (event) => { event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(CORE))); self.skipWaiting(); });
 self.addEventListener('activate', (event) => { event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))))); self.clients.claim(); });

@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icons/mirshad.svg">
-  <link rel="stylesheet" href="./styles.css?v=index1">
+  <link rel="stylesheet" href="./styles.css?v=video-guide1">
 </head>
 <body>
   <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
@@ -224,11 +224,22 @@
 
       <section class="view" id="view-video" data-title="مختبر الفيديو">
         <div class="page-intro video-intro">
-          <div><span class="section-kicker">التجربة العملية رقم 1</span><h2>وصفة مِرْشاد لإنتاج فيديو عربي</h2><p>نبدأ بعينة قصيرة من 60–90 ثانية، ونوثق كل قرار قبل الانتقال إلى إنتاج أكبر.</p></div>
+          <div><span class="section-kicker">ابدأ من هنا</span><h2>إنتاج فيديو عربي خطوة بخطوة</h2><p>اختر المهمة، ثم اتبع الخطوة الحالية. البرومبتات ومسارات العمل مراجع اختيارية؛ لا تحتاج التنقل بينها للبدء.</p></div>
           <div class="lab-progress"><strong id="video-progress-label">0%</strong><span>نسبة إنجاز التجربة</span><div class="progress-track"><i id="video-progress"></i></div></div>
         </div>
+        <section class="video-guide" aria-label="دليل التنفيذ الحالي">
+          <div class="video-guide-setup">
+            <label for="video-project-type">نوع الفيديو</label>
+            <select id="video-project-type"><option value="avatar-ad">إعلان حقيبة تدريبية بأفاتار</option><option value="general">فيديو عربي آخر</option></select>
+            <label for="video-project-goal">ما النتيجة التي تريدها؟</label>
+            <input id="video-project-goal" type="text" placeholder="مثلاً: إعلان عربي أفقي مدته نحو دقيقة" autocomplete="off">
+            <button class="secondary-action" id="video-save-brief" type="button">احفظ المهمة وابدأ</button>
+            <small>يُحفظ اختيارك والتقدم على هذا الجهاز فقط. هذا المختبر يرشدك؛ إنتاج الصوت والفيديو يتم بالأداة التي تختارها.</small>
+          </div>
+          <div class="video-current" id="video-current" aria-live="polite"></div>
+        </section>
         <div class="video-brief">
-          <div><span>النطاق المقترح</span><b>فيديو عربي قصير</b><small>60–90 ثانية · عمودي أو أفقي · عينة واحدة</small></div>
+          <div><span>سجل التقدم</span><b>12 مرحلة إلى فيديو قابل للمراجعة</b><small>المربعات أدناه لتوثيق الإنجاز فقط؛ الخطوة العملية تظهر أعلاه.</small></div>
           <button class="secondary-action" id="reset-video" type="button">تصفير التجربة</button>
         </div>
         <div class="lab-steps" id="video-steps"></div>
@@ -265,6 +276,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=index2" defer></script>
+  <script src="./app.js?v=video-guide1" defer></script>
 </body>
 </html>

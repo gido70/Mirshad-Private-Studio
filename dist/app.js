@@ -6,6 +6,8 @@ const state = {
   view: 'radar',
   favorites: JSON.parse(localStorage.getItem('mirshad:favorites') || '{"tools":[],"workflows":[]}'),
   videoDone: JSON.parse(localStorage.getItem('mirshad:video-progress') || '[]'),
+  videoBrief: JSON.parse(localStorage.getItem('mirshad:video-brief') || 'null'),
+  videoChoices: JSON.parse(localStorage.getItem('mirshad:video-choices') || '{}'),
   radarRead: JSON.parse(localStorage.getItem('mirshad:radar-read') || '[]'),
   radarUnreadOnly: false,
   toolLimit: 36,
@@ -26,6 +28,23 @@ const videoSteps = [
   ['الترجمة والتسميات', 'صحح Captions واختبر قراءتها على الهاتف.', 'إتاحة'],
   ['التصدير والقياس', 'صدّر النسخة، ثم سجل الزمن والتكلفة والجودة والأخطاء.', 'اعتماد']
 ];
+
+const videoGuidance = [
+  ['اكتب لمن الإعلان وما الذي سيفهمه المشاهد في النهاية. لإعلان مسار AI: الجمهور متعلم يريد اختيار أداة والبدء بمهمة؛ الصيغة أفقية ونحو 65 ثانية.', 'احفظ الموجز أعلاه، ثم علّم هذه المرحلة منجزة.'],
+  ['راجع عناوين الوحدات الخمس ووصف الحقيبة، وتأكد أن الإعلان لا يعد بتنفيذ المهام داخل أدوات خارجية.', 'دوّن أي ادعاء يحتاج مصدرًا قبل متابعة النص.'],
+  ['اقرأ النص بصوت مسموع واضبط طوله ولغته. النص الجاهز لهذه التجربة هو سيناريو إعلان مسار AI الذي راجعته.', 'راجع النص ثم علّم المرحلة منجزة.'],
+  ['رتّب المشاهد: الأفاتار في البداية والختام، وبينهما أغلفة الوحدات الخمس بالترتيب.', 'اضبط زمن كل لقطة في جدول المشاهد.'],
+  ['استخدم صورة الأفاتار والشعار والأغلفة التي تملكها. الصورة الثابتة ليست أفاتارًا متحدثًا بعد.', 'افحص المقاس والحقوق ووضوح الكتابة.'],
+  ['أنشئ عينة صوتية للافتتاحية فقط: «عندك فكرة، لكنك لا تعرف من أين تبدأ؟». ابدأ بالخيار المتاح في حسابك، وافحص الشروط قبل أي تكلفة.', 'قارن أدوات الصوت في الدليل'],
+  ['استمع إلى العينة وافحص «مسار AI» والمصطلحات والوقفات؛ عدّل النص أو قاموس النطق إذا لزم.', 'لا تكمل قبل قبول الصوت العربي.'],
+  ['جرّب تحريك صورة الأفاتار مع عينة الصوت 10–15 ثانية. راقب الوجه واليدين وثبات الشخصية وتزامن الشفاه.', 'قارن أدوات الأفاتار في الدليل'],
+  ['اجمع مقطع الأفاتار مع أغلفة الوحدات والشعار في محرر فيديو، واترك الموسيقى تحت الكلام.', 'قارن أدوات المونتاج في الدليل'],
+  ['استخرج النص المنطوق من النسخة الممنتجة وقارنه بالنص المعتمد.', 'صحح أي كلمات أسقطها التفريغ.'],
+  ['أضف ترجمة عربية قصيرة واضحة، وراجعها يدويًا على شاشة الهاتف.', 'لا تغطِّ الوجه أو عنوان الوحدة.'],
+  ['صدّر MP4 ثم راجع النطق والحقوق والمدة والجودة والتكلفة الفعلية قبل استبدال الإعلان القديم.', 'سجل ما نجح وما يحتاج تعديلًا.']
+];
+const videoToolQueries = {6:'صوت عربي',8:'أفاتار',9:'مونتاج فيديو'};
+const videoToolOptions = {6:['ElevenLabs','Gemini TTS'],8:['HeyGen','LivePortrait'],9:['CapCut','DaVinci Resolve']};
 
 const qs = (selector, root = document) => root.querySelector(selector);
 const qsa = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -106,7 +125,7 @@ function workflowCard(item) {
     <div class="card-head"><h3>${esc(item.title)}</h3><span class="risk ${item.risk === 'مرتفع' ? 'risk-high' : 'risk-medium'}">${esc(item.risk)}</span></div>
     <p class="card-copy"><b>المدخلات:</b> ${esc(item.input)}</p>
     <div class="card-meta"><span>${esc(item.steps.split('←').length)} مراحل</span><span>قرار بشري محفوظ</span></div>
-    <div class="card-actions"><button class="open-detail" data-workflow-id="${item.id}" type="button">فتح الطريق ←</button><button class="favorite-button ${saved ? 'saved' : ''}" data-favorite-type="workflows" data-favorite-id="${item.id}" type="button" aria-label="${saved ? 'إزالة من المحفوظات' : 'حفظ'}">${saved ? '♥' : '♡'}</button></div>
+    <div class="card-actions"><button class="open-detail" data-workflow-id="${item.id}" type="button">عرض تفاصيل المسار ←</button><button class="favorite-button ${saved ? 'saved' : ''}" data-favorite-type="workflows" data-favorite-id="${item.id}" type="button" aria-label="${saved ? 'إزالة من المحفوظات' : 'حفظ'}">${saved ? '♥' : '♡'}</button></div>
   </article>`;
 }
 
@@ -259,10 +278,30 @@ function searchAll() {
 }
 
 function renderVideo() {
+  qs('#video-project-type').value = state.videoBrief?.type || 'avatar-ad';
+  qs('#video-project-goal').value = state.videoBrief?.goal || '';
   qs('#video-steps').innerHTML = videoSteps.map((step, index) => {
     const done = state.videoDone.includes(index + 1);
     return `<label class="lab-step ${done ? 'done' : ''}"><input type="checkbox" data-video-step="${index + 1}" ${done ? 'checked' : ''}><span class="step-number">${index + 1}</span><div><h3>${esc(step[0])}</h3><p>${esc(step[1])}</p></div><span class="step-tag">${esc(step[2])}</span></label>`;
   }).join('');
+  const next = videoSteps.findIndex((_, index) => !state.videoDone.includes(index + 1));
+  const current = qs('#video-current');
+  if (next < 0) {
+    current.innerHTML = '<span class="section-kicker">اكتملت قائمة العمل</span><h3>راجع النسخة النهائية قبل اعتمادها</h3><p>تأكد من الصوت والأفاتار والحقوق والقراءة على الهاتف. يمكنك إلغاء أي علامة للعودة إلى مرحلتها.</p>';
+  } else {
+    const number = next + 1;
+    const [exampleInstruction, action] = videoGuidance[next];
+    const instruction = state.videoBrief?.type === 'general' ? `${videoSteps[next][1]} ابدأ بعينة قصيرة، وافحص النتيجة قبل الانتقال.` : exampleInstruction;
+    const search = videoToolQueries[number];
+    const options = (videoToolOptions[number] || []).map(name => {
+      const tool = state.data.tools.find(item => item.name === name);
+      if (!tool) return '';
+      const price = state.guide.pricing[name];
+      const selected = state.videoChoices[number] === name;
+      return `<article class="video-tool-option"><h4>${esc(name)} ${selected ? '✓ اخترتها للتجربة' : ''}</h4><p>${esc(tool.note)}</p><small>${price ? `${esc(price.tier)} · السعر موثق في السجل، راجعه قبل الاستخدام` : 'السعر والخطة المجانية غير موثقين هنا؛ تحقق رسميًا أولًا'}</small><div><button type="button" data-video-choose="${esc(name)}" data-video-choice-step="${number}">${selected ? 'الأداة المختارة' : 'اختر للتجربة'}</button><button type="button" data-tool-id="${tool.id}">تفاصيل الأداة</button><a href="${esc(price?.source || tool.url)}" target="_blank" rel="noopener">المصدر الرسمي ←</a></div></article>`;
+    }).join('');
+    current.innerHTML = `<span class="section-kicker">الخطوة الحالية ${number} من ${videoSteps.length}</span><h3>${esc(videoSteps[next][0])}</h3><p>${esc(instruction)}</p>${options ? `<div class="video-tool-options"><p>خياران للبدء بالمقارنة؛ الاختيار يسجل نيتك للتجربة ولا يشغّل الخدمة أو يرتب الجودة.</p>${options}</div>` : ''}<div class="video-current-actions">${search ? `<button class="primary-action" type="button" data-video-tool-search="${esc(search)}">${esc(action)} ←</button>` : `<strong>${esc(action)}</strong>`}<button class="secondary-action" type="button" data-video-complete="${number}" ${number === 1 && !state.videoBrief ? 'disabled title="احفظ المهمة أولًا"' : ''}>أنجزت هذه الخطوة، انتقل للتالية</button></div><small>لا تضع علامة الإنجاز قبل تنفيذ وفحص هذه المرحلة. المقارنة تعرض معلومات السجل، ولا تعني أن أداة معينة هي الأفضل دون تجربة.</small>`;
+  }
   updateVideoProgress();
 }
 
@@ -304,8 +343,8 @@ function openWorkflow(id) {
   const prompt = `أنت مدير إنتاج وباحث متخصص. أريد تنفيذ مسار: «${item.title}».\n\nالمدخلات المتاحة: ${item.input}.\nابنِ لي خطة تنفيذ عملية وفق التسلسل: ${item.steps}.\nاجعل بوابة الجودة الإلزامية: ${item.gate}.\nوضح ما يجب أن يبقى قرارًا بشريًا: ${item.human}.\n\nأخرج النتيجة في جدول: المرحلة | المدخلات | الأداة المقترحة | المخرج | فحص الجودة | الخطر | قرار الإنسان.`;
   qs('#dialog-kicker').textContent = 'مسار عمل';
   qs('#dialog-title').textContent = item.title;
-  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>المدخلات</span><b>${esc(item.input)}</b></div><div class="dialog-row"><span>خطوات التنفيذ</span><b>${esc(item.steps)}</b></div><div class="dialog-row"><span>بوابة الجودة</span><b>${esc(item.gate)}</b></div><div class="dialog-row"><span>القرار البشري</span><b>${esc(item.human)}</b></div><div class="dialog-row"><span>✅ برومبت البدء: عدّل المدخلات ثم انسخ</span><pre class="prompt-box" id="active-prompt">${esc(prompt)}</pre></div><div class="dialog-row"><span>🚫 تجنب هذا الخطأ</span><b>لا تختلق مدخلات أو مصادر، ولا تتجاوز بوابة الجودة: ${esc(item.gate)}.</b></div><div class="dialog-row"><span>💡 نصيحة تنفيذية</span><b>ابدأ بعينة صغيرة، ثم اترك القرار التالي لك: ${esc(item.human)}.</b></div>`;
-  qs('#dialog-actions').innerHTML = `<button type="button" data-copy-prompt>نسخ البرومبت</button><button class="favorite-button ${isFavorite('workflows', item.id) ? 'saved' : ''}" data-favorite-type="workflows" data-favorite-id="${item.id}" type="button">${isFavorite('workflows', item.id) ? '♥ محفوظ' : '♡ حفظ'}</button>`;
+  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>المدخلات</span><b>${esc(item.input)}</b></div><div class="dialog-row"><span>خطوات التنفيذ</span><b>${esc(item.steps)}</b></div><div class="dialog-row"><span>بوابة الجودة</span><b>${esc(item.gate)}</b></div><div class="dialog-row"><span>القرار البشري</span><b>${esc(item.human)}</b></div><details class="dialog-row"><summary>برومبت اختياري إذا أردت بدء محادثة جديدة</summary><pre class="prompt-box" id="active-prompt">${esc(prompt)}</pre><button class="secondary-action" type="button" data-copy-prompt>نسخ البرومبت</button></details><div class="dialog-row"><span>🚫 تجنب هذا الخطأ</span><b>لا تختلق مدخلات أو مصادر، ولا تتجاوز بوابة الجودة: ${esc(item.gate)}.</b></div>`;
+  qs('#dialog-actions').innerHTML = `${[6,9].includes(item.id) ? '<button type="button" data-video-from-workflow>ابدأ التنفيذ في مختبر الفيديو</button>' : ''}<button class="favorite-button ${isFavorite('workflows', item.id) ? 'saved' : ''}" data-favorite-type="workflows" data-favorite-id="${item.id}" type="button">${isFavorite('workflows', item.id) ? '♥ محفوظ' : '♡ حفظ'}</button>`;
   qs('#detail-dialog').showModal();
 }
 
@@ -347,6 +386,13 @@ function bindEvents() {
     if (favorite) toggleFavorite(favorite.dataset.favoriteType, favorite.dataset.favoriteId);
     const workflow = event.target.closest('[data-workflow-id]');
     if (workflow) openWorkflow(workflow.dataset.workflowId);
+    if (event.target.closest('[data-video-from-workflow]')) { qs('#detail-dialog').close(); setView('video'); }
+    const complete = event.target.closest('[data-video-complete]');
+    if (complete) { const id = Number(complete.dataset.videoComplete); if (!state.videoDone.includes(id)) state.videoDone.push(id); state.videoDone.sort((a,b) => a-b); localStorage.setItem('mirshad:video-progress', JSON.stringify(state.videoDone)); renderVideo(); }
+    const videoSearch = event.target.closest('[data-video-tool-search]');
+    if (videoSearch) { qs('#global-search-input').value = videoSearch.dataset.videoToolSearch; setView('search'); searchAll(); }
+    const videoChoice = event.target.closest('[data-video-choose]');
+    if (videoChoice) { state.videoChoices[videoChoice.dataset.videoChoiceStep] = videoChoice.dataset.videoChoose; localStorage.setItem('mirshad:video-choices', JSON.stringify(state.videoChoices)); renderVideo(); }
     const promptButton = event.target.closest('[data-intent-prompt]');
     if (promptButton) openIntentPrompt(promptButton.dataset.intentPrompt);
     const searchIntent = event.target.closest('[data-intent-search]');
@@ -411,7 +457,14 @@ function bindEvents() {
     localStorage.setItem('mirshad:video-progress', JSON.stringify(state.videoDone));
     renderVideo();
   });
-  qs('#reset-video').addEventListener('click', () => { state.videoDone = []; localStorage.setItem('mirshad:video-progress', '[]'); renderVideo(); toast('بدأت التجربة من جديد'); });
+  qs('#video-save-brief').addEventListener('click', () => {
+    const goal = qs('#video-project-goal').value.trim();
+    if (!goal) { qs('#video-project-goal').focus(); toast('اكتب النتيجة المطلوبة أولًا'); return; }
+    state.videoBrief = {type:qs('#video-project-type').value, goal};
+    localStorage.setItem('mirshad:video-brief', JSON.stringify(state.videoBrief));
+    renderVideo(); toast('حُفظت المهمة على هذا الجهاز');
+  });
+  qs('#reset-video').addEventListener('click', () => { state.videoDone = []; state.videoChoices = {}; localStorage.setItem('mirshad:video-progress', '[]'); localStorage.setItem('mirshad:video-choices', '{}'); renderVideo(); toast('بدأت التجربة من جديد'); });
   qs('#radar-category').addEventListener('change', renderRadar);
   qs('#radar-priority').addEventListener('change', renderRadar);
   qs('#radar-unread-only').addEventListener('click', () => { state.radarUnreadOnly = !state.radarUnreadOnly; renderRadar(); });
