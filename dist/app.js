@@ -5,6 +5,7 @@ const state = {
   index: null,
   view: 'radar',
   favorites: JSON.parse(localStorage.getItem('mirshad:favorites') || '{"tools":[],"workflows":[]}'),
+  intake: JSON.parse(localStorage.getItem('mirshad:intake') || 'null'),
   videoDone: JSON.parse(localStorage.getItem('mirshad:video-progress') || '[]'),
   videoBrief: JSON.parse(localStorage.getItem('mirshad:video-brief') || 'null'),
   videoChoices: JSON.parse(localStorage.getItem('mirshad:video-choices') || '{}'),
@@ -322,6 +323,41 @@ function renderFavorites() {
   target.innerHTML = `${workflows.length ? `<section class="result-group"><h3>المسارات (${workflows.length})</h3><div class="cards-grid">${workflows.map(workflowCard).join('')}</div></section>` : ''}${tools.length ? `<section class="result-group"><h3>الأدوات (${tools.length})</h3><div class="cards-grid tools">${tools.map(toolCard).join('')}</div></section>` : ''}`;
 }
 
+
+// The gateway uses transparent local matching. It never sends drafts or files to a server.
+const taskProfiles = [
+  {id:'video', title:'فيديو', terms:['فيديو','فيلم','مقطع','اعلان','مونتاج','افاتار','كرتون','انيميشن','تحريك'], categories:['video','avatar','editing'], assets:['نص أو فكرة','صورة الأفاتار أو المشاهد','صوت أو تعليق','شعار أو هوية'], steps:['حدد نوع الفيديو والجمهور والمدة','جهّز النص والصور والصوت المتاح','اختبر لقطة قصيرة والنطق والحقوق','أنتج المشاهد ثم راجع المونتاج والتصدير']},
+  {id:'research', title:'بحث أو دراسة', terms:['بحث','دراسه','دراسة','مصادر','تقرير','تحليل','مراجع'], categories:['research','data'], assets:['سؤال البحث','مصادر أو ملفات','حدود المكان والزمان'], steps:['حدد سؤالًا ونطاقًا','اجمع المصادر الأصلية','قارن الأدلة وسجل الاستشهادات','اكتب خلاصة وراجع الادعاءات']},
+  {id:'presentation', title:'عرض تقديمي أو مستند', terms:['عرض','شرائح','برزنتيشن','مستند','وثيقه','وثيقة','pdf'], categories:['docs','writing'], assets:['محتوى أو مخطط','شعار وهوية','صور وبيانات'], steps:['حدد الجمهور والقرار المطلوب','ابنِ مخطط الشرائح أو الفصول','أنشئ نموذجًا قصيرًا','راجع الأرقام والعربية والتصدير']},
+  {id:'image', title:'صورة أو تصميم', terms:['صوره','صورة','صور','تصميم','بوستر','تحسين','شعار'], categories:['image'], assets:['صورة أصلية إن وجدت','هوية وألوان','مقاس الاستخدام'], steps:['حدد إنشاء صورة أو تعديلها','اجمع الأصول والمقاس','جرّب نموذجًا واحدًا','راجع النصوص والحقوق والدقة']},
+  {id:'voice', title:'صوت أو بودكاست', terms:['صوت','تعليق','دبلجه','دبلجة','بودكاست','تسجيل','نطق'], categories:['voice','arabic'], assets:['نص التسجيل','عينة صوت بإذن صاحبها إن وجدت','اللهجة والمدة'], steps:['حدد نوع الصوت واللهجة','راجع النص وقاموس النطق','اختبر عينة قصيرة','استمع وراجع الحقوق والتصدير']},
+  {id:'song', title:'أغنية أو موسيقى', terms:['اغنيه','أغنية','موسيقى','لحن','نشيد'], categories:['music','voice'], assets:['كلمات أو فكرة','نمط موسيقي','مرجع صوتي مرخّص'], steps:['حدد الغرض والأسلوب','جهّز الكلمات والأصول','اختبر مقطعًا قصيرًا','راجع النطق والحقوق والمزيج']},
+  {id:'book', title:'كتاب أو قصة', terms:['كتاب','روايه','رواية','قصه','قصة','تأليف','فصول'], categories:['writing','research'], assets:['فكرة وجمهور','مخطط فصول أو شخصيات','مراجع عند الحاجة'], steps:['حدد النوع والجمهور','ابنِ مخطط الفصول أو الحبكة','اكتب عينة قصيرة','حرر وتحقق من المصادر والحقوق']},
+  {id:'automation', title:'أتمتة أو تطبيق', terms:['اتمته','أتمتة','تطبيق','موقع','برمجه','برمجة','كود','سير عمل'], categories:['work','coding'], assets:['وصف العملية الحالية','المدخلات والمخرجات','صلاحيات الأنظمة'], steps:['ارسم العملية والحالات الاستثنائية','حدد الأنظمة والصلاحيات','نفذ اختبارًا صغيرًا','راجع الأمان والتكلفة ثم وسع']}
+];
+function saveIntake() { localStorage.setItem('mirshad:intake', JSON.stringify(state.intake)); }
+function inferTask(description) {
+  const words = normalizeArabic(description);
+  const ranked = taskProfiles.map(p => ({p, n:p.terms.filter(t => words.includes(normalizeArabic(t))).length})).sort((a,b) => b.n-a.n);
+  return ranked[0].n ? ranked[0].p : null;
+}
+function renderIntake() {
+  const record = state.intake;
+  if (!record) return;
+  const select = qs('#intake-type');
+  if (select.options.length === 1) taskProfiles.forEach(p => select.insertAdjacentHTML('beforeend', `<option value="${p.id}">${p.title}</option>`));
+  const profile = taskProfiles.find(p => p.id === record.type) || inferTask(record.description);
+  if (!profile) { qs('#intake-result').innerHTML = '<article class="intake-card"><h3>نحتاج توضيح نوع المهمة</h3><p>اختر النوع من القائمة، أو أضف فعلًا واضحًا مثل «أريد إنشاء فيديو» أو «أريد كتابة قصة».</p></article>'; return; }
+  const available = profile.assets.filter(a => (record.assets || []).includes(a));
+  const missing = profile.assets.filter(a => !available.includes(a));
+  const tools = state.data.tools.filter(t => profile.categories.includes(t.category) && t.evidence !== 'H' && t.url).sort((a,b) => ({A:0,B:1,C:2}[a.evidence] ?? 3)-({A:0,B:1,C:2}[b.evidence] ?? 3)).slice(0,6);
+  const workflow = state.data.workflows.filter(w => { const x = normalizeArabic(w.title); return profile.terms.some(t => x.includes(normalizeArabic(t))); }).slice(0,3);
+  qs('#intake-result').innerHTML = `<div class="intake-card"><span class="section-kicker">تحليل أولي قابل للتصحيح</span><h3>${esc(profile.title)}</h3><p>الوصف: ${esc(record.description)}. ${record.audience ? `الجمهور: ${esc(record.audience)}. ` : ''}${record.format ? `الشكل: ${esc(record.format)}.` : ''}</p><p>هل فهمنا المهمة؟ غيّر «نوع المهمة» أعلاه إن لزم. ${record.type === 'auto' ? 'الاختيار الحالي مستنتج من الكلمات.' : 'النوع محدد بواسطتك.'}</p></div>
+  <div class="intake-card"><h3>ما الذي لديك الآن؟</h3><p>علّم المتوفر. ما لم تحدده يظهر ضمن التحضير؛ يمكنك إكماله لاحقًا.</p><div class="intake-checks">${profile.assets.map(a => `<label><input type="checkbox" data-intake-asset="${esc(a)}" ${available.includes(a) ? 'checked' : ''}> ${esc(a)}</label>`).join('')}</div><p><strong>المطلوب تحضيره:</strong> ${missing.length ? missing.map(esc).join('، ') : 'المدخلات الأساسية مسجلة؛ راجع جودتها.'}</p><label>ملفات محلية لهذا العمل <input type="file" multiple aria-label="ملفات العمل المحلية"></label><small>اختيار الملفات للتذكير فقط؛ لا تُرفع ولا تُحفظ محتوياتها. اخترها مجددًا بعد تحديث الصفحة. لا تُحفظ الحسابات أو كلمات المرور هنا.</small></div>
+  <div class="intake-card"><h3>الطريق المقترح</h3><ol>${profile.steps.map(step => `<li>${esc(step)}</li>`).join('')}</ol>${profile.id === 'video' ? '<button type="button" class="primary-action" data-intake-video>تابع في مختبر الفيديو</button>' : ''}${workflow.length ? `<p>مسارات مرتبطة: ${workflow.map(w => `<button type="button" class="text-button" data-workflow-id="${w.id}">${esc(w.title)}</button>`).join(' ')}</p>` : ''}</div>
+  <div class="intake-card"><h3>أدوات مرتبطة من الإندكس</h3><p>هذه أمثلة أولية بحسب المجال ودرجة توثيق السجل، وليست ترتيبًا مثبتًا للجودة أو السعر. افتح بطاقة الأداة للمزايا والقيود، وتحقق من السعر الحالي قبل الاشتراك.</p><div class="intake-tool-list">${tools.map(t => `<button type="button" data-tool-id="${t.id}"><strong>${esc(t.name)}</strong><span>${esc(t.categoryLabel || state.data.categories[t.category] || '')} · توثيق ${esc(t.evidence)}</span></button>`).join('')}</div><button type="button" class="secondary-action" data-intake-search="${esc(profile.title)}">بحث أوسع في الإندكس</button></div>`;
+}
+
 function renderCurrentView() {
   if (!state.data) return;
   if (state.view === 'radar') renderRadar();
@@ -330,6 +366,7 @@ function renderCurrentView() {
   if (state.view === 'workflows') renderWorkflows();
   if (state.view === 'tools') renderTools();
   if (state.view === 'video') renderVideo();
+  if (state.view === 'intake') renderIntake();
   if (state.view === 'favorites') renderFavorites();
 }
 
@@ -431,9 +468,32 @@ function bindEvents() {
   });
   qs('#start-search-form').addEventListener('submit', (event) => {
     event.preventDefault();
-    qs('#global-search-input').value = qs('#start-search-input').value;
-    setView('search');
-    searchAll();
+    qs('#intake-description').value = qs('#start-search-input').value;
+    setView('intake');
+    qs('#intake-description').focus();
+  });
+  qs('#intake-form').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const description = qs('#intake-description').value.trim();
+    if (!description) return;
+    state.intake = { description, type: qs('#intake-type').value, audience: qs('#intake-audience').value.trim(), format: qs('#intake-format').value.trim(), assets: state.intake?.description === description ? state.intake.assets || [] : [] };
+    saveIntake(); renderIntake();
+  });
+  qs('#intake-type').addEventListener('change', () => { if (state.intake) { state.intake.type = qs('#intake-type').value; state.intake.assets = []; saveIntake(); renderIntake(); } });
+  qs('#intake-result').addEventListener('change', (event) => {
+    if (event.target.matches('[data-intake-asset]') && state.intake) {
+      const key = event.target.dataset.intakeAsset;
+      state.intake.assets = event.target.checked ? [...new Set([...(state.intake.assets || []),key])] : (state.intake.assets || []).filter(x => x !== key);
+      saveIntake(); renderIntake();
+    }
+  });
+  qs('#intake-result').addEventListener('click', (event) => {
+    if (event.target.closest('[data-intake-video]') && state.intake) {
+      qs('#video-project-goal').value = state.intake.description;
+      setView('video');
+    }
+    const button = event.target.closest('[data-intake-search]');
+    if (button) { qs('#global-search-input').value = button.dataset.intakeSearch; setView('search'); searchAll(); }
   });
   qs('#global-search-input').addEventListener('input', searchAll);
   qs('#global-search-form').addEventListener('submit', (event) => { event.preventDefault(); searchAll(); });
@@ -510,6 +570,8 @@ async function init() {
     qs('#intent-shortcuts').innerHTML = state.guide.intents.map((item) => `<button type="button" data-intent="${esc(item.title)}">${esc(item.title)}</button>`).join('');
     const radarCategory = qs('#radar-category');
     [...new Set(state.radar.updates.map((item) => item.category))].sort().forEach((label) => radarCategory.insertAdjacentHTML('beforeend', `<option value="${esc(label)}">${esc(label)}</option>`));
+    taskProfiles.forEach(p => qs('#intake-type').insertAdjacentHTML('beforeend', `<option value="${p.id}">${p.title}</option>`));
+    if (state.intake) { qs('#intake-description').value = state.intake.description || ''; qs('#intake-type').value = state.intake.type || 'auto'; qs('#intake-audience').value = state.intake.audience || ''; qs('#intake-format').value = state.intake.format || ''; }
     bindEvents();
     history.replaceState({ mirshadTrail: [qs(`#view-${location.hash.slice(1)}`) ? location.hash.slice(1) : 'radar'] }, '', location.href);
     setView(location.hash.slice(1) || 'radar', false);

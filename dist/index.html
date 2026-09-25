@@ -12,7 +12,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" type="image/svg+xml" href="./icons/mirshad.svg">
-  <link rel="stylesheet" href="./styles.css?v=video-guide1">
+  <link rel="stylesheet" href="./styles.css?v=task-gateway1">
 </head>
 <body>
   <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
@@ -29,6 +29,7 @@
 
       <nav class="side-nav">
         <button class="nav-item active" data-view="radar" type="button"><span>◉</span><b>رادار المستجدات</b><i class="nav-badge" id="radar-nav-badge" hidden>0</i></button>
+        <button class="nav-item" data-view="intake" type="button"><span>✦</span><b>ابدأ بمهمة</b></button>
         <button class="nav-item" data-view="search" type="button"><span>⌕</span><b>ابدأ وابحث</b></button>
         <button class="nav-item" data-view="map" type="button"><span>◇</span><b>الخريطة والبرومبتات</b></button>
         <button class="nav-item" data-view="workflows" type="button"><span>↝</span><b>مسارات العمل</b></button>
@@ -61,8 +62,8 @@
 
       <section class="view active" id="view-radar" data-title="رادار مِرْشاد الأسبوعي">
         <div class="start-here" aria-label="ابدأ في مِرْشاد">
-          <div><span class="section-kicker">نقطة البداية</span><h2>ماذا تريد أن تنجز؟</h2><p>اكتب سؤالك؛ يعرض مِرْشاد ما يجده في الإندكس والدراسة وسجل الأدوات، ثم يقترح المسار والبرومبت.</p></div>
-          <form id="start-search-form" role="search"><label class="sr-only" for="start-search-input">بحث في إندكس مِرْشاد</label><input id="start-search-input" type="search" placeholder="مثلاً: أريد إنتاج فيديو عربي أو بحث موثق" autocomplete="off"><button class="search-submit" type="submit">بحث في الإندكس</button></form>
+          <div><span class="section-kicker">نقطة البداية</span><h2>ماذا تريد أن تنجز؟</h2><p>اكتب سؤالك؛ سيفهم مِرْشاد وصفك، ويسألك عن المدخلات، ثم يعرض خطة وأدوات من الإندكس.</p></div>
+          <form id="start-search-form" role="search"><label class="sr-only" for="start-search-input">بحث في إندكس مِرْشاد</label><input id="start-search-input" type="search" placeholder="مثلاً: أريد إنتاج فيديو عربي أو بحث موثق" autocomplete="off"><button class="search-submit" type="submit">ابدأ المهمة</button></form>
           <div class="quick-chips"><button type="button" data-quick-search="فيديو">إنتاج فيديو</button><button type="button" data-quick-search="بحث موثق">بحث موثق</button><button type="button" data-quick-search="صوت عربي">صوت عربي</button><button type="button" data-open-view="map">كيف أستخدم مِرْشاد؟</button></div>
         </div>
         <div class="radar-hero">
@@ -222,6 +223,18 @@
         <button class="load-more" id="load-more-tools" type="button" hidden>عرض المزيد</button>
       </section>
 
+      <section class="view" id="view-intake" data-title="ابدأ بمهمة">
+        <div class="page-intro"><div><span class="section-kicker">بوابة المهمة</span><h2>صف ما تريد إنجازه</h2><p>من الوصف إلى المتطلبات، ثم خطة وأدوات مناسبة من دليل مِرْشاد. يمكنك تصحيح نوع المهمة بنفسك.</p></div></div>
+        <form id="intake-form" class="intake-card">
+          <label for="intake-description">ما النتيجة التي تريدها؟</label>
+          <textarea id="intake-description" rows="4" required placeholder="مثلاً: أريد إعلان فيديو عربي بأفاتاري وصوري، مدته دقيقة للحقيبة التدريبية"></textarea>
+          <div class="intake-fields"><label>نوع المهمة <select id="intake-type"><option value="auto">حدده من الوصف</option></select></label><label>لمن هذا العمل؟ <input id="intake-audience" type="text" placeholder="مثلاً: متعلمون مبتدئون"></label><label>المقاس أو المدة أو الشكل <input id="intake-format" type="text" placeholder="مثلاً: فيديو أفقي 60 ثانية"></label></div>
+          <button class="primary-action" type="submit">حلّل المهمة ورتّب الطريق</button>
+          <small>التحليل الأولي يعتمد على كلمات الوصف وتصنيفات الإندكس، وليس محادثة ذكاء اصطناعي متصلة. راجع الاختيار قبل التنفيذ.</small>
+        </form>
+        <div id="intake-result" aria-live="polite"></div>
+      </section>
+
       <section class="view" id="view-video" data-title="مختبر الفيديو">
         <div class="page-intro video-intro">
           <div><span class="section-kicker">ابدأ من هنا</span><h2>إنتاج فيديو عربي خطوة بخطوة</h2><p>اختر المهمة، ثم اتبع الخطوة الحالية. البرومبتات ومسارات العمل مراجع اختيارية؛ لا تحتاج التنقل بينها للبدء.</p></div>
@@ -263,7 +276,7 @@
 
   <nav class="mobile-nav" aria-label="التنقل على الهاتف">
     <button class="active" data-view="radar" type="button"><span>◉</span><b>الرادار</b></button>
-    <button data-view="map" type="button"><span>◇</span><b>الخريطة</b></button>
+    <button data-view="intake" type="button"><span>✦</span><b>ابدأ</b></button>
     <button data-view="search" type="button"><span>⌕</span><b>بحث</b></button>
     <button data-view="tools" type="button"><span>◫</span><b>الأدوات</b></button>
     <button data-view="video" type="button"><span>▶</span><b>الفيديو</b></button>
@@ -276,6 +289,6 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=video-guide1" defer></script>
+  <script src="./app.js?v=task-gateway1" defer></script>
 </body>
 </html>

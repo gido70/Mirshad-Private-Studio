@@ -419,3 +419,18 @@ dialog::backdrop { background: rgba(3,20,29,.62); backdrop-filter: blur(4px); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition: none !important; }
 }
+
+/* Task gateway */
+.intake-card { margin: 18px 0; padding: clamp(18px,3vw,30px); border: 1px solid #cbdedc; border-radius: 20px; background: #fff; display: grid; gap: 14px; line-height: 1.75; }
+.intake-card h3 { margin: 0; font-size: 1.35rem; color: #123c48; }
+.intake-card p { margin: 0; }
+.intake-card label { font-weight: 700; }
+.intake-card small { font-size: .9rem; color: #47616b; }
+.intake-card textarea, .intake-card input:not([type=checkbox]):not([type=file]), .intake-card select { display: block; width: 100%; margin-top: 6px; padding: 12px; border: 1px solid #aabfc3; border-radius: 10px; font: inherit; color: #143b48; background: #fff; }
+.intake-fields { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.intake-checks { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.intake-checks label { background: #f3f9f8; padding: 10px; border-radius: 10px; }
+.intake-tool-list { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.intake-tool-list button { display: grid; text-align: right; padding: 12px; border: 1px solid #cbdedc; border-radius: 10px; background: #f3f9f8; color: #163c48; cursor: pointer; }
+.intake-tool-list span { font-size: .85rem; }
+@media (max-width: 720px) { .intake-fields, .intake-checks, .intake-tool-list { grid-template-columns: 1fr; } }
