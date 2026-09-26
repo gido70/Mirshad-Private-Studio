@@ -9,6 +9,7 @@ const state = {
   videoDone: JSON.parse(localStorage.getItem('mirshad:video-progress') || '[]'),
   videoBrief: JSON.parse(localStorage.getItem('mirshad:video-brief') || 'null'),
   videoChoices: JSON.parse(localStorage.getItem('mirshad:video-choices') || '{}'),
+  videoTrial: JSON.parse(localStorage.getItem('mirshad:video-trial') || '{}'),
   radarRead: JSON.parse(localStorage.getItem('mirshad:radar-read') || '[]'),
   radarUnreadOnly: false,
   toolLimit: 36,
@@ -46,6 +47,7 @@ const videoGuidance = [
 ];
 const videoToolQueries = {6:'صوت عربي',8:'أفاتار',9:'مونتاج فيديو'};
 const videoToolOptions = {5:['WaveSpeedAI'],6:['ElevenLabs','Gemini TTS','WaveSpeedAI'],8:['WaveSpeedAI','HeyGen','LivePortrait'],9:['CapCut','DaVinci Resolve']};
+const trialSteps = [6, 8, 9];
 const toolCategories = (item) => item.categories || [item.category];
 const toolCategoryLabels = (item) => toolCategories(item).map(key => state.data.categories[key]).filter(Boolean).join('، ');
 
@@ -282,6 +284,8 @@ function searchAll() {
 }
 
 function renderVideo() {
+  const trial = state.guide.wavespeedTrial;
+  qs('#wavespeed-plan').innerHTML = `<p>${esc(trial.status)}</p><ol>${trial.stages.map(stage => `<li><strong>الخطوة ${stage.step}: ${esc(stage.title)}</strong> · ${esc(stage.model)} · <a href="${esc(stage.url)}" target="_blank" rel="noopener">فتح النموذج الرسمي ↗</a></li>`).join('')}</ol><p>لوحة الـ65 ثانية: ${trial.storyboard.map(scene => `${esc(scene.time)} ${esc(scene.visual)}`).join('؛ ')}.</p>`;
   qs('#video-project-type').value = state.videoBrief?.type || 'avatar-ad';
   qs('#video-project-goal').value = state.videoBrief?.goal || '';
   qs('#video-steps').innerHTML = videoSteps.map((step, index) => {
@@ -305,7 +309,11 @@ function renderVideo() {
       const officialUrl = tool.routes?.[number]?.url || tool.url;
       return `<article class="video-tool-option"><h4>${esc(name)} ${selected ? '✓ اخترتها للتجربة' : ''}</h4><p>${esc(tool.note)}</p><small>${price ? `${esc(price.tier)} · السعر موثق في السجل، راجعه قبل الاستخدام` : 'السعر والخطة المجانية غير موثقين هنا؛ تحقق رسميًا أولًا'}</small><div><button type="button" data-video-choose="${esc(name)}" data-video-choice-step="${number}">${selected ? 'الأداة المختارة' : 'اختر للتجربة'}</button><button type="button" data-tool-id="${tool.id}">تفاصيل الأداة</button><a href="${esc(officialUrl)}" target="_blank" rel="noopener">المصدر الرسمي ←</a></div></article>`;
     }).join('');
-    current.innerHTML = `<span class="section-kicker">الخطوة الحالية ${number} من ${videoSteps.length}</span><h3>${esc(videoSteps[next][0])}</h3><p>${esc(instruction)}</p>${options ? `<div class="video-tool-options"><p>خياران للبدء بالمقارنة؛ الاختيار يسجل نيتك للتجربة ولا يشغّل الخدمة أو يرتب الجودة.</p>${options}</div>` : ''}<div class="video-current-actions">${search ? `<button class="primary-action" type="button" data-video-tool-search="${esc(search)}">${esc(action)} ←</button>` : `<strong>${esc(action)}</strong>`}<button class="secondary-action" type="button" data-video-complete="${number}" ${number === 1 && !state.videoBrief ? 'disabled title="احفظ المهمة أولًا"' : ''}>أنجزت هذه الخطوة، انتقل للتالية</button></div><small>لا تضع علامة الإنجاز قبل تنفيذ وفحص هذه المرحلة. المقارنة تعرض معلومات السجل، ولا تعني أن أداة معينة هي الأفضل دون تجربة.</small>`;
+    const stage = state.videoBrief?.type !== 'general' && trial.stages.find(item => item.step === number);
+    const saved = state.videoTrial[number] || {};
+    const snippet = number === 6 ? trial.shortScript : number === 8 ? trial.motionPrompt : '';
+    const stagePanel = stage ? `<section class="trial-stage"><h4>خطة التجربة: ${esc(stage.model)}</h4><p>${esc(stage.action)}</p>${snippet ? `<label>${number === 6 ? 'نص العينة' : 'توجيه الحركة الاختياري'}<textarea id="trial-copy" readonly rows="${number === 6 ? 3 : 5}">${esc(snippet)}</textarea></label><button type="button" data-trial-copy="trial-copy">نسخ النص</button>${number === 6 ? `<details><summary>النص الكامل بعد قبول عينة الصوت</summary><textarea id="trial-full-copy" readonly rows="11">${esc(trial.fullScript)}</textarea><button type="button" data-trial-copy="trial-full-copy">نسخ النص الكامل</button></details>` : ''}` : ''}<p><a href="${esc(stage.url)}" target="_blank" rel="noopener">افتح صفحة النموذج أو المحرر الرسمي ↗</a></p><small>التكلفة والحدود: ${esc(stage.price)}</small><p><strong>الفحص:</strong> ${esc(stage.check)}</p><label>التكلفة الفعلية بالدولار (اختياري)<input id="trial-cost" type="number" min="0" step="0.01" value="${esc(saved.cost || '')}" inputmode="decimal"></label><label>ملاحظات المشاهدة والنتيجة<textarea id="trial-notes" rows="3" placeholder="ماذا سمعت أو شاهدت؟ وما الذي يحتاج تعديلًا؟">${esc(saved.notes || '')}</textarea></label><label class="trial-confirm"><input id="trial-reviewed" type="checkbox" ${saved.reviewed ? 'checked' : ''}> ${number === 6 ? 'استمعت إلى العينة الصوتية' : number === 8 ? 'شاهدت عينة الأفاتار وفحصت الشفاه والعربية' : 'شاهدت النسخة الممنتجة على الهاتف'}</label><button type="button" data-trial-save="${number}">احفظ نتيجة الفحص على هذا الجهاز</button><small>المصدر: <a href="${esc(stage.source)}" target="_blank" rel="noopener">صفحة الأداة الرسمية ↗</a>. لا يُرفع الصوت أو الصورة أو الفيديو إلى مِرْشاد.</small></section>` : '';
+    current.innerHTML = `<span class="section-kicker">الخطوة الحالية ${number} من ${videoSteps.length}</span><h3>${esc(videoSteps[next][0])}</h3><p>${esc(instruction)}</p>${options ? `<div class="video-tool-options"><p>اختر أداة للتجربة؛ الاختيار لا يشغّل الخدمة ولا يرتب الجودة.</p>${options}</div>` : ''}${stagePanel}<div class="video-current-actions">${search ? `<button class="primary-action" type="button" data-video-tool-search="${esc(search)}">${esc(action)} ←</button>` : `<strong>${esc(action)}</strong>`}<button class="secondary-action" type="button" data-video-complete="${number}" ${number === 1 && !state.videoBrief ? 'disabled title="احفظ المهمة أولًا"' : ''}>أنجزت هذه الخطوة، انتقل للتالية</button></div><small>لا تضع علامة الإنجاز قبل تنفيذ وفحص هذه المرحلة. المقارنة تعرض معلومات السجل، ولا تعني أن أداة معينة هي الأفضل دون تجربة.</small>`;
   }
   updateVideoProgress();
 }
@@ -314,6 +322,13 @@ function updateVideoProgress() {
   const percent = Math.round((state.videoDone.length / videoSteps.length) * 100);
   ['#video-progress', '#home-video-progress'].forEach((selector) => { const node = qs(selector); if (node) node.style.width = `${percent}%`; });
   ['#video-progress-label', '#home-video-progress-label'].forEach((selector) => { const node = qs(selector); if (node) node.textContent = `${percent}%`; });
+}
+
+function canCompleteVideoStep(id) {
+  if (state.videoBrief?.type === 'general' || !trialSteps.includes(id)) return true;
+  if (state.videoTrial[id]?.reviewed) return true;
+  toast(id === 6 ? 'احفظ نتيجة الاستماع إلى الصوت أولًا' : 'شاهد العينة واحفظ نتيجة الفحص أولًا');
+  return false;
 }
 
 function renderFavorites() {
@@ -429,7 +444,11 @@ function bindEvents() {
     if (workflow) openWorkflow(workflow.dataset.workflowId);
     if (event.target.closest('[data-video-from-workflow]')) { qs('#detail-dialog').close(); setView('video'); }
     const complete = event.target.closest('[data-video-complete]');
-    if (complete) { const id = Number(complete.dataset.videoComplete); if (!state.videoDone.includes(id)) state.videoDone.push(id); state.videoDone.sort((a,b) => a-b); localStorage.setItem('mirshad:video-progress', JSON.stringify(state.videoDone)); renderVideo(); }
+    if (complete) { const id = Number(complete.dataset.videoComplete); if (!canCompleteVideoStep(id)) return; if (!state.videoDone.includes(id)) state.videoDone.push(id); state.videoDone.sort((a,b) => a-b); localStorage.setItem('mirshad:video-progress', JSON.stringify(state.videoDone)); renderVideo(); }
+    const trialCopy = event.target.closest('[data-trial-copy]');
+    if (trialCopy) { const snippet = qs(`#${trialCopy.dataset.trialCopy}`); navigator.clipboard.writeText(snippet.value).then(() => toast('نُسخ النص')).catch(() => { snippet.select(); toast('حدد النص وانسخه يدويًا'); }); }
+    const trialSave = event.target.closest('[data-trial-save]');
+    if (trialSave) { const id = Number(trialSave.dataset.trialSave); const cost = qs('#trial-cost').value; const notes = qs('#trial-notes').value.trim(); const reviewed = qs('#trial-reviewed').checked; if (reviewed && !notes) { toast('دوّن نتيجة فحص العينة قبل اعتمادها'); qs('#trial-notes').focus(); return; } state.videoTrial[id] = {cost, notes, reviewed}; localStorage.setItem('mirshad:video-trial', JSON.stringify(state.videoTrial)); toast('حُفظت نتيجة الفحص على هذا الجهاز'); }
     const videoSearch = event.target.closest('[data-video-tool-search]');
     if (videoSearch) { qs('#global-search-input').value = videoSearch.dataset.videoToolSearch; setView('search'); searchAll(); }
     const videoChoice = event.target.closest('[data-video-choose]');
@@ -515,6 +534,7 @@ function bindEvents() {
     const input = event.target.closest('[data-video-step]');
     if (!input) return;
     const id = Number(input.dataset.videoStep);
+    if (input.checked && !canCompleteVideoStep(id)) { input.checked = false; return; }
     if (input.checked && !state.videoDone.includes(id)) state.videoDone.push(id);
     if (!input.checked) state.videoDone = state.videoDone.filter((item) => item !== id);
     state.videoDone.sort((a, b) => a - b);
@@ -528,7 +548,7 @@ function bindEvents() {
     localStorage.setItem('mirshad:video-brief', JSON.stringify(state.videoBrief));
     renderVideo(); toast('حُفظت المهمة على هذا الجهاز');
   });
-  qs('#reset-video').addEventListener('click', () => { state.videoDone = []; state.videoChoices = {}; localStorage.setItem('mirshad:video-progress', '[]'); localStorage.setItem('mirshad:video-choices', '{}'); renderVideo(); toast('بدأت التجربة من جديد'); });
+  qs('#reset-video').addEventListener('click', () => { state.videoDone = []; state.videoChoices = {}; state.videoTrial = {}; localStorage.setItem('mirshad:video-progress', '[]'); localStorage.setItem('mirshad:video-choices', '{}'); localStorage.setItem('mirshad:video-trial', '{}'); renderVideo(); toast('بدأت التجربة من جديد'); });
   qs('#radar-category').addEventListener('change', renderRadar);
   qs('#radar-priority').addEventListener('change', renderRadar);
   qs('#radar-unread-only').addEventListener('click', () => { state.radarUnreadOnly = !state.radarUnreadOnly; renderRadar(); });
