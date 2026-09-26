@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "sourceVersion": "V1.4",
-  "generatedAt": "2026-09-24T19:00:00Z",
+  "generatedAt": "2026-09-26T00:00:00Z",
   "categories": {
     "research": "البحث والمعرفة",
     "planning": "الأفكار والتخطيط",
@@ -4717,6 +4717,53 @@
       "note": "بناء تطبيقات من وصف نصي؛ اختبر جودة المخرجات والتصدير.",
       "url": "https://www.uimagic.io/",
       "status": "مرشح نشط"
+    },
+    {
+      "id": 392,
+      "name": "WaveSpeedAI",
+      "category": "avatar",
+      "categoryLabel": "الشخصيات والأفاتار",
+      "categories": [
+        "avatar",
+        "video",
+        "image",
+        "voice",
+        "music",
+        "editing",
+        "spatial"
+      ],
+      "kind": "منصة نماذج متعددة الوسائط",
+      "access": "سحابي",
+      "evidence": "A",
+      "note": "منصة تجمع نماذج الصور والفيديو والصوت والموسيقى وثلاثي الأبعاد. لتحريك صورة الأفاتار بصوت مسجل: InfiniteTalk؛ النص اختياري لتوجيه المشهد ولا يغني عن ملف الصوت في هذا النموذج. جرّب العربية وتزامن الشفاه على عينة قصيرة؛ السعر والحقوق يختلفان بحسب النموذج.",
+      "url": "https://wavespeed.ai/models",
+      "routes": {
+        "5": {
+          "label": "توليد صورة أو تعديلها",
+          "url": "https://wavespeed.ai/image-generator"
+        },
+        "6": {
+          "label": "تحويل النص إلى صوت أو إنشاء موسيقى",
+          "url": "https://wavespeed.ai/audio-generator"
+        },
+        "8": {
+          "label": "InfiniteTalk: صورة الأفاتار + تسجيل صوتي",
+          "url": "https://wavespeed.ai/models/wavespeed-ai/infinitetalk"
+        },
+        "video": {
+          "label": "توليد فيديو",
+          "url": "https://wavespeed.ai/video-generator"
+        },
+        "editing": {
+          "label": "تحرير فيديو بنماذج متعددة",
+          "url": "https://wavespeed.ai/collections/video-edit"
+        },
+        "spatial": {
+          "label": "نماذج ثلاثية الأبعاد",
+          "url": "https://wavespeed.ai/models"
+        }
+      },
+      "status": "مرشح نشط · جرّبه المستخدم لتحريك الصورة بالصوت؛ لم يوثّق مِرْشاد قياسًا مستقلًا للعربية"
     }
   ],
   "workflows": [

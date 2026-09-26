@@ -35,17 +35,19 @@ const videoGuidance = [
   ['راجع عناوين الوحدات الخمس ووصف الحقيبة، وتأكد أن الإعلان لا يعد بتنفيذ المهام داخل أدوات خارجية.', 'دوّن أي ادعاء يحتاج مصدرًا قبل متابعة النص.'],
   ['اقرأ النص بصوت مسموع واضبط طوله ولغته. النص الجاهز لهذه التجربة هو سيناريو إعلان مسار AI الذي راجعته.', 'راجع النص ثم علّم المرحلة منجزة.'],
   ['رتّب المشاهد: الأفاتار في البداية والختام، وبينهما أغلفة الوحدات الخمس بالترتيب.', 'اضبط زمن كل لقطة في جدول المشاهد.'],
-  ['استخدم صورة الأفاتار والشعار والأغلفة التي تملكها. الصورة الثابتة ليست أفاتارًا متحدثًا بعد.', 'افحص المقاس والحقوق ووضوح الكتابة.'],
+  ['ابدأ بصورة الأفاتار وحدها للتجربة؛ الشعار وأغلفة الوحدات تأتي في المونتاج. الصورة الثابتة ليست أفاتارًا متحدثًا بعد.', 'افحص المقاس والحقوق ووضوح الصورة.'],
   ['أنشئ عينة صوتية للافتتاحية فقط: «عندك فكرة، لكنك لا تعرف من أين تبدأ؟». ابدأ بالخيار المتاح في حسابك، وافحص الشروط قبل أي تكلفة.', 'قارن أدوات الصوت في الدليل'],
   ['استمع إلى العينة وافحص «مسار AI» والمصطلحات والوقفات؛ عدّل النص أو قاموس النطق إذا لزم.', 'لا تكمل قبل قبول الصوت العربي.'],
-  ['جرّب تحريك صورة الأفاتار مع عينة الصوت 10–15 ثانية. راقب الوجه واليدين وثبات الشخصية وتزامن الشفاه.', 'قارن أدوات الأفاتار في الدليل'],
+  ['جرّب صورة الأفاتار مع أول 10–15 ثانية من تسجيلك الصوتي. في InfiniteTalk يلزم ملف الصوت؛ النص توجيه اختياري للمشهد. راقب ثبات الوجه واليدين وتزامن الشفاه والعربية، ثم احفظ العينة. لا تعلّم الخطوة منجزة قبل مشاهدتها.', 'قارن أدوات الأفاتار في الدليل'],
   ['اجمع مقطع الأفاتار مع أغلفة الوحدات والشعار في محرر فيديو، واترك الموسيقى تحت الكلام.', 'قارن أدوات المونتاج في الدليل'],
   ['استخرج النص المنطوق من النسخة الممنتجة وقارنه بالنص المعتمد.', 'صحح أي كلمات أسقطها التفريغ.'],
   ['أضف ترجمة عربية قصيرة واضحة، وراجعها يدويًا على شاشة الهاتف.', 'لا تغطِّ الوجه أو عنوان الوحدة.'],
   ['صدّر MP4 ثم راجع النطق والحقوق والمدة والجودة والتكلفة الفعلية قبل استبدال الإعلان القديم.', 'سجل ما نجح وما يحتاج تعديلًا.']
 ];
 const videoToolQueries = {6:'صوت عربي',8:'أفاتار',9:'مونتاج فيديو'};
-const videoToolOptions = {6:['ElevenLabs','Gemini TTS'],8:['HeyGen','LivePortrait'],9:['CapCut','DaVinci Resolve']};
+const videoToolOptions = {5:['WaveSpeedAI'],6:['ElevenLabs','Gemini TTS','WaveSpeedAI'],8:['WaveSpeedAI','HeyGen','LivePortrait'],9:['CapCut','DaVinci Resolve']};
+const toolCategories = (item) => item.categories || [item.category];
+const toolCategoryLabels = (item) => toolCategories(item).map(key => state.data.categories[key]).filter(Boolean).join('، ');
 
 const qs = (selector, root = document) => root.querySelector(selector);
 const qsa = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -136,7 +138,7 @@ function toolCard(item) {
   return `<article class="tool-card">
     <div class="card-head"><h3 dir="auto">${esc(item.name)}</h3><span class="evidence evidence-${item.evidence}">${esc(item.evidence)}</span></div>
     <p class="card-copy">${esc(item.note)}</p>
-    <div class="card-meta"><span>${esc(item.categoryLabel)}</span><span>${esc(item.kind)}</span><span>${esc(price?.tier || 'السعر غير موثق')}</span></div>
+    <div class="card-meta"><span>${esc(toolCategoryLabels(item))}</span><span>${esc(item.kind)}</span><span>${esc(price?.tier || 'السعر غير موثق')}</span></div>
     <div class="card-actions"><button class="open-detail" data-tool-id="${item.id}" type="button">التفاصيل ←</button><button class="favorite-button ${saved ? 'saved' : ''}" data-favorite-type="tools" data-favorite-id="${item.id}" type="button" aria-label="${saved ? 'إزالة من المحفوظات' : 'حفظ'}">${saved ? '♥' : '♡'}</button></div>
   </article>`;
 }
@@ -223,8 +225,8 @@ function renderTools(resetLimit = false) {
   const category = qs('#tool-category').value;
   const evidence = qs('#tool-evidence').value;
   const filtered = state.data.tools.filter((item) => {
-    const text = normalizeArabic(`${item.name} ${item.categoryLabel} ${item.kind} ${item.access} ${item.note} ${item.status}`);
-    return (!query || text.includes(query)) && (category === 'all' || item.category === category) && (evidence === 'all' || item.evidence === evidence);
+    const text = normalizeArabic(`${item.name} ${toolCategoryLabels(item)} ${item.kind} ${item.access} ${item.note} ${item.status}`);
+    return (!query || text.includes(query)) && (category === 'all' || toolCategories(item).includes(category)) && (evidence === 'all' || item.evidence === evidence);
   });
   const visible = filtered.slice(0, state.toolLimit);
   qs('#tool-count').textContent = `${filtered.length} نتيجة من أصل ${state.data.tools.length}`;
@@ -251,14 +253,15 @@ function searchAll() {
   const terms = query.split(/\s+/).filter((word) => word.length > 2 && !['اريد','افضل','موقع','مواقع','انشاء','عمل','لدي','كيف','يمكن'].includes(word));
   const matches = (value) => terms.length && terms.every((term) => normalizeArabic(value).includes(term));
   const scored = state.data.tools.map((item) => {
-    const ownText = `${item.name} ${item.categoryLabel} ${item.kind} ${item.note}`;
-    const categoryMatch = intent?.categories.includes(item.category);
+    const ownText = `${item.name} ${toolCategoryLabels(item)} ${item.kind} ${item.note}`;
+    const categoryRanks = toolCategories(item).map(key => intent?.categories.indexOf(key) ?? -1).filter(rank => rank >= 0);
+    const categoryMatch = categoryRanks.length > 0;
     const exact = matches(ownText);
     const price = state.guide.pricing[item.name];
-    const score = (exact ? 100 : 0) + (categoryMatch ? 40 - intent.categories.indexOf(item.category) * 4 : 0) + (price ? 3 : 0) + (item.evidence === 'A' ? 2 : item.evidence === 'B' ? 1 : 0);
+    const score = (exact ? 100 : 0) + (categoryMatch ? 40 - Math.min(...categoryRanks) * 4 : 0) + (price ? 3 : 0) + (item.evidence === 'A' ? 2 : item.evidence === 'B' ? 1 : 0);
     return {item, score};
-  }).filter(({item,score}) => score > 2 && (intent || matches(`${item.name} ${item.categoryLabel} ${item.kind} ${item.note}`)))
-    .filter(({item}) => (selectedCategory === 'all' || item.category === selectedCategory) && (priceFilter === 'all' || (priceFilter === 'free' ? !!state.guide.pricing[item.name]?.tier.includes('مجاني') : !state.guide.pricing[item.name])) && (evidenceFilter === 'all' || item.evidence === evidenceFilter));
+  }).filter(({item,score}) => score > 2 && (intent || matches(`${item.name} ${toolCategoryLabels(item)} ${item.kind} ${item.note}`)))
+    .filter(({item}) => (selectedCategory === 'all' || toolCategories(item).includes(selectedCategory)) && (priceFilter === 'all' || (priceFilter === 'free' ? !!state.guide.pricing[item.name]?.tier.includes('مجاني') : !state.guide.pricing[item.name])) && (evidenceFilter === 'all' || item.evidence === evidenceFilter));
   scored.sort((a,b) => sort === 'name' ? a.item.name.localeCompare(b.item.name,'ar') : b.score - a.score || a.item.name.localeCompare(b.item.name,'ar'));
   const tools = scored.map(({item}) => item);
   const workflows = state.data.workflows.filter((item) => intent ? intent.workflowIds.includes(item.id) : matches(`${item.title} ${item.input} ${item.steps} ${item.gate} ${item.human}`));
@@ -299,7 +302,8 @@ function renderVideo() {
       if (!tool) return '';
       const price = state.guide.pricing[name];
       const selected = state.videoChoices[number] === name;
-      return `<article class="video-tool-option"><h4>${esc(name)} ${selected ? '✓ اخترتها للتجربة' : ''}</h4><p>${esc(tool.note)}</p><small>${price ? `${esc(price.tier)} · السعر موثق في السجل، راجعه قبل الاستخدام` : 'السعر والخطة المجانية غير موثقين هنا؛ تحقق رسميًا أولًا'}</small><div><button type="button" data-video-choose="${esc(name)}" data-video-choice-step="${number}">${selected ? 'الأداة المختارة' : 'اختر للتجربة'}</button><button type="button" data-tool-id="${tool.id}">تفاصيل الأداة</button><a href="${esc(price?.source || tool.url)}" target="_blank" rel="noopener">المصدر الرسمي ←</a></div></article>`;
+      const officialUrl = tool.routes?.[number]?.url || tool.url;
+      return `<article class="video-tool-option"><h4>${esc(name)} ${selected ? '✓ اخترتها للتجربة' : ''}</h4><p>${esc(tool.note)}</p><small>${price ? `${esc(price.tier)} · السعر موثق في السجل، راجعه قبل الاستخدام` : 'السعر والخطة المجانية غير موثقين هنا؛ تحقق رسميًا أولًا'}</small><div><button type="button" data-video-choose="${esc(name)}" data-video-choice-step="${number}">${selected ? 'الأداة المختارة' : 'اختر للتجربة'}</button><button type="button" data-tool-id="${tool.id}">تفاصيل الأداة</button><a href="${esc(officialUrl)}" target="_blank" rel="noopener">المصدر الرسمي ←</a></div></article>`;
     }).join('');
     current.innerHTML = `<span class="section-kicker">الخطوة الحالية ${number} من ${videoSteps.length}</span><h3>${esc(videoSteps[next][0])}</h3><p>${esc(instruction)}</p>${options ? `<div class="video-tool-options"><p>خياران للبدء بالمقارنة؛ الاختيار يسجل نيتك للتجربة ولا يشغّل الخدمة أو يرتب الجودة.</p>${options}</div>` : ''}<div class="video-current-actions">${search ? `<button class="primary-action" type="button" data-video-tool-search="${esc(search)}">${esc(action)} ←</button>` : `<strong>${esc(action)}</strong>`}<button class="secondary-action" type="button" data-video-complete="${number}" ${number === 1 && !state.videoBrief ? 'disabled title="احفظ المهمة أولًا"' : ''}>أنجزت هذه الخطوة، انتقل للتالية</button></div><small>لا تضع علامة الإنجاز قبل تنفيذ وفحص هذه المرحلة. المقارنة تعرض معلومات السجل، ولا تعني أن أداة معينة هي الأفضل دون تجربة.</small>`;
   }
@@ -350,12 +354,12 @@ function renderIntake() {
   if (!profile) { qs('#intake-result').innerHTML = '<article class="intake-card"><h3>نحتاج توضيح نوع المهمة</h3><p>اختر النوع من القائمة، أو أضف فعلًا واضحًا مثل «أريد إنشاء فيديو» أو «أريد كتابة قصة».</p></article>'; return; }
   const available = profile.assets.filter(a => (record.assets || []).includes(a));
   const missing = profile.assets.filter(a => !available.includes(a));
-  const tools = state.data.tools.filter(t => profile.categories.includes(t.category) && t.evidence !== 'H' && t.url).sort((a,b) => ({A:0,B:1,C:2}[a.evidence] ?? 3)-({A:0,B:1,C:2}[b.evidence] ?? 3)).slice(0,6);
+  const tools = state.data.tools.filter(t => toolCategories(t).some(key => profile.categories.includes(key)) && t.evidence !== 'H' && t.url).sort((a,b) => ({A:0,B:1,C:2}[a.evidence] ?? 3)-({A:0,B:1,C:2}[b.evidence] ?? 3)).slice(0,6);
   const workflow = state.data.workflows.filter(w => { const x = normalizeArabic(w.title); return profile.terms.some(t => x.includes(normalizeArabic(t))); }).slice(0,3);
   qs('#intake-result').innerHTML = `<div class="intake-card"><span class="section-kicker">تحليل أولي قابل للتصحيح</span><h3>${esc(profile.title)}</h3><p>الوصف: ${esc(record.description)}. ${record.audience ? `الجمهور: ${esc(record.audience)}. ` : ''}${record.format ? `الشكل: ${esc(record.format)}.` : ''}</p><p>هل فهمنا المهمة؟ غيّر «نوع المهمة» أعلاه إن لزم. ${record.type === 'auto' ? 'الاختيار الحالي مستنتج من الكلمات.' : 'النوع محدد بواسطتك.'}</p></div>
   <div class="intake-card"><h3>ما الذي لديك الآن؟</h3><p>علّم المتوفر. ما لم تحدده يظهر ضمن التحضير؛ يمكنك إكماله لاحقًا.</p><div class="intake-checks">${profile.assets.map(a => `<label><input type="checkbox" data-intake-asset="${esc(a)}" ${available.includes(a) ? 'checked' : ''}> ${esc(a)}</label>`).join('')}</div><p><strong>المطلوب تحضيره:</strong> ${missing.length ? missing.map(esc).join('، ') : 'المدخلات الأساسية مسجلة؛ راجع جودتها.'}</p><label>ملفات محلية لهذا العمل <input type="file" multiple aria-label="ملفات العمل المحلية"></label><small>اختيار الملفات للتذكير فقط؛ لا تُرفع ولا تُحفظ محتوياتها. اخترها مجددًا بعد تحديث الصفحة. لا تُحفظ الحسابات أو كلمات المرور هنا.</small></div>
   <div class="intake-card"><h3>الطريق المقترح</h3><ol>${profile.steps.map(step => `<li>${esc(step)}</li>`).join('')}</ol>${profile.id === 'video' ? '<button type="button" class="primary-action" data-intake-video>تابع في مختبر الفيديو</button>' : ''}${workflow.length ? `<p>مسارات مرتبطة: ${workflow.map(w => `<button type="button" class="text-button" data-workflow-id="${w.id}">${esc(w.title)}</button>`).join(' ')}</p>` : ''}</div>
-  <div class="intake-card"><h3>أدوات مرتبطة من الإندكس</h3><p>هذه أمثلة أولية بحسب المجال ودرجة توثيق السجل، وليست ترتيبًا مثبتًا للجودة أو السعر. افتح بطاقة الأداة للمزايا والقيود، وتحقق من السعر الحالي قبل الاشتراك.</p><div class="intake-tool-list">${tools.map(t => `<button type="button" data-tool-id="${t.id}"><strong>${esc(t.name)}</strong><span>${esc(t.categoryLabel || state.data.categories[t.category] || '')} · توثيق ${esc(t.evidence)}</span></button>`).join('')}</div><button type="button" class="secondary-action" data-intake-search="${esc(profile.title)}">بحث أوسع في الإندكس</button></div>`;
+  <div class="intake-card"><h3>أدوات مرتبطة من الإندكس</h3><p>هذه أمثلة أولية بحسب المجال ودرجة توثيق السجل، وليست ترتيبًا مثبتًا للجودة أو السعر. افتح بطاقة الأداة للمزايا والقيود، وتحقق من السعر الحالي قبل الاشتراك.</p><div class="intake-tool-list">${tools.map(t => `<button type="button" data-tool-id="${t.id}"><strong>${esc(t.name)}</strong><span>${esc(toolCategoryLabels(t))} · توثيق ${esc(t.evidence)}</span></button>`).join('')}</div><button type="button" class="secondary-action" data-intake-search="${esc(profile.title)}">بحث أوسع في الإندكس</button></div>`;
 }
 
 function renderCurrentView() {
@@ -399,10 +403,10 @@ function openTool(id) {
   const item = state.data.tools.find((entry) => entry.id === Number(id));
   if (!item) return;
   const price = state.guide?.pricing[item.name];
-  qs('#dialog-kicker').textContent = item.categoryLabel;
+  qs('#dialog-kicker').textContent = toolCategoryLabels(item);
   qs('#dialog-title').textContent = item.name;
-  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>تعريف الأداة ومجالها</span><b>${esc(item.name)}: ${esc(item.kind)} · ${esc(item.categoryLabel)}</b></div><div class="dialog-row"><span>ماذا تفعل وما فائدتها؟</span><b>${esc(item.note)}</b></div><div class="dialog-row"><span>طريقة الوصول</span><b>${esc(item.access)}</b></div><div class="dialog-row"><span>السعر والخطة المجانية</span><b>${esc(price ? `${price.tier}: ${price.detail}` : 'لم يتحقق مِرْشاد من السعر الحالي؛ راجع الموقع الرسمي قبل أي قرار.')}</b>${price ? `<a href="${esc(price.source)}" target="_blank" rel="noopener">مصدر السعر الرسمي ↗</a>` : ''}</div><div class="dialog-row"><span>التقييم وحالة التحقق</span><b>${esc(item.evidence)} — ${esc(item.status)}. هذه درجة تحقق المعلومات وليست تقييم جودة.</b></div><div class="dialog-row"><span>الجودة العملية</span><b>${esc(price?.quality || 'لم يُنفذ اختبار جودة مقارن موثق بعد.')}</b></div><div class="dialog-row"><span>قبل الاستخدام</span><b>هذا وصف في الدليل وليس تشغيلًا مدمجًا. اختبر الأداة على عينة حقيقية ووثّق الجودة والتكلفة والقيود.</b></div>`;
-  qs('#dialog-actions').innerHTML = `${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">زيارة صفحة الأداة ↗</a>` : ''}<button class="favorite-button ${isFavorite('tools', item.id) ? 'saved' : ''}" data-favorite-type="tools" data-favorite-id="${item.id}" type="button">${isFavorite('tools', item.id) ? '♥ محفوظ' : '♡ حفظ'}</button>`;
+  qs('#dialog-body').innerHTML = `<div class="dialog-row"><span>تعريف الأداة ومجالها</span><b>${esc(item.name)}: ${esc(item.kind)} · ${esc(toolCategoryLabels(item))}</b></div><div class="dialog-row"><span>ماذا تفعل وما فائدتها؟</span><b>${esc(item.note)}</b></div><div class="dialog-row"><span>طريقة الوصول</span><b>${esc(item.access)}</b></div><div class="dialog-row"><span>السعر والخطة المجانية</span><b>${esc(price ? `${price.tier}: ${price.detail}` : 'لم يتحقق مِرْشاد من السعر الحالي؛ راجع الموقع الرسمي قبل أي قرار.')}</b>${price ? `<a href="${esc(price.source)}" target="_blank" rel="noopener">مصدر السعر الرسمي ↗</a>` : ''}</div><div class="dialog-row"><span>التقييم وحالة التحقق</span><b>${esc(item.evidence)} — ${esc(item.status)}. هذه درجة تحقق المعلومات وليست تقييم جودة.</b></div><div class="dialog-row"><span>الجودة العملية</span><b>${esc(price?.quality || 'لم يُنفذ اختبار جودة مقارن موثق بعد.')}</b></div><div class="dialog-row"><span>قبل الاستخدام</span><b>هذا وصف في الدليل وليس تشغيلًا مدمجًا. اختبر الأداة على عينة حقيقية ووثّق الجودة والتكلفة والقيود.</b></div>`;
+  qs('#dialog-actions').innerHTML = `${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">زيارة صفحة الأداة ↗</a>` : ''}${Object.values(item.routes || {}).map(route => `<a href="${esc(route.url)}" target="_blank" rel="noopener">${esc(route.label)} ↗</a>`).join('')}<button class="favorite-button ${isFavorite('tools', item.id) ? 'saved' : ''}" data-favorite-type="tools" data-favorite-id="${item.id}" type="button">${isFavorite('tools', item.id) ? '♥ محفوظ' : '♡ حفظ'}</button>`;
   qs('#detail-dialog').showModal();
 }
 

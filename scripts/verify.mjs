@@ -21,8 +21,12 @@ for (const section of index.sections) {
 }
 if (new Set(index.sections.map(section => section.id)).size !== index.sections.length) throw new Error('Duplicate index sections');
 if (Object.keys(data.categories).length !== 21) throw new Error('Expected 21 categories');
-if (data.tools.length !== 391) throw new Error('Expected 391 tools');
+if (data.tools.length !== 392) throw new Error('Expected 392 tools');
 if (data.workflows.length !== 24) throw new Error('Expected 24 workflows');
+const waveSpeed = data.tools.find(item => item.name === 'WaveSpeedAI');
+if (!waveSpeed || !['avatar','video','image','voice','music','editing','spatial'].every(key => waveSpeed.categories?.includes(key))) throw new Error('WaveSpeedAI category routes missing');
+if (waveSpeed.routes?.[8]?.url !== 'https://wavespeed.ai/models/wavespeed-ai/infinitetalk') throw new Error('InfiniteTalk execution link missing');
+if (!guide.pricing.WaveSpeedAI?.source.startsWith('https://')) throw new Error('WaveSpeedAI pricing source missing');
 if (new Set(data.tools.map((item) => item.id)).size !== data.tools.length) throw new Error('Duplicate tool IDs');
 if (new Set(data.tools.map((item) => item.name.toLowerCase())).size !== data.tools.length) throw new Error('Duplicate tool names');
 if (new Set(data.workflows.map((item) => item.id)).size !== data.workflows.length) throw new Error('Duplicate workflow IDs');
@@ -58,4 +62,4 @@ const app = read('app.js');
 new vm.Script(app, { filename: 'app.js' });
 JSON.parse(read('manifest.webmanifest'));
 
-console.log(JSON.stringify({ ok: true, categories: 21, tools: 391, workflows: 24, radarUpdates: radar.updates.length, rtl: true, pwa: true }));
+console.log(JSON.stringify({ ok: true, categories: 21, tools: 392, workflows: 24, radarUpdates: radar.updates.length, rtl: true, pwa: true }));
