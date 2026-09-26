@@ -27,6 +27,10 @@ const waveSpeed = data.tools.find(item => item.name === 'WaveSpeedAI');
 if (!waveSpeed || !['avatar','video','image','voice','music','editing','spatial'].every(key => waveSpeed.categories?.includes(key))) throw new Error('WaveSpeedAI category routes missing');
 if (waveSpeed.routes?.[8]?.url !== 'https://wavespeed.ai/models/wavespeed-ai/infinitetalk') throw new Error('InfiniteTalk execution link missing');
 if (!guide.pricing.WaveSpeedAI?.source.startsWith('https://')) throw new Error('WaveSpeedAI pricing source missing');
+const trial = guide.wavespeedTrial;
+if (!trial || JSON.stringify(trial.stages.map(item => item.step)) !== '[6,8,9]' || trial.storyboard.length !== 8) throw new Error('WaveSpeed trial stages or storyboard missing');
+if (!trial.shortScript || !trial.fullScript || !trial.motionPrompt || trial.assets.covers.length !== 5) throw new Error('WaveSpeed trial scripts or assets missing');
+for (const stage of trial.stages) if (!stage.url.startsWith('https://') || !stage.source.startsWith('https://') || !stage.check) throw new Error('Incomplete WaveSpeed trial stage');
 if (new Set(data.tools.map((item) => item.id)).size !== data.tools.length) throw new Error('Duplicate tool IDs');
 if (new Set(data.tools.map((item) => item.name.toLowerCase())).size !== data.tools.length) throw new Error('Duplicate tool names');
 if (new Set(data.workflows.map((item) => item.id)).size !== data.workflows.length) throw new Error('Duplicate workflow IDs');
@@ -57,6 +61,7 @@ if (!html.includes('lang="ar" dir="rtl"')) throw new Error('Arabic RTL document 
 if (!read('study.html').includes('lang="ar" dir="rtl"')) throw new Error('Arabic RTL study missing');
 for (const id of ['start-search-form', 'start-search-input', 'search-category', 'search-pricing', 'search-evidence', 'search-sort', 'intent-shortcuts']) if (!html.includes(`id="${id}"`)) throw new Error(`Missing search control: ${id}`);
 if (!read('study.html').includes('index-sections.json')) throw new Error('Study does not read the shared index');
+if (!html.includes('id="wavespeed-plan"') || !read('study.html').includes('id="wavespeed-study"')) throw new Error('WaveSpeed index or study section missing');
 
 const app = read('app.js');
 new vm.Script(app, { filename: 'app.js' });
